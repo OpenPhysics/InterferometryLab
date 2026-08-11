@@ -1,4 +1,4 @@
-# Implementation Notes - SceneryStack Template
+# Implementation Notes - Interferometry Lab
 
 Developer-facing notes on the **SceneryStackTemplate** scaffold. **Replace and expand this file when
 forking** to describe your sim's real architecture (see Stern Gerlach or Light Propagation for
@@ -12,21 +12,21 @@ reference wiring, and reusable common components — **without** domain physics.
 
 ```
 main.ts
-  └─ SimScreen             (Screen<SimModel, SimScreenView>)
-       ├─ SimModel          state + logic  (src/sim-screen/model/)  ← stub: add physics here
-       └─ SimScreenView     visuals        (src/sim-screen/view/)
-            ├─ SimScreenSummaryContent     (PDOM overview — reference a11y pattern)
-            └─ SimKeyboardHelpContent      (keyboard help dialog)
+  └─ MichelsonScreen             (Screen<MichelsonModel, MichelsonScreenView>)
+       ├─ MichelsonModel          state + logic  (src/michelson/model/)  ← stub: add physics here
+       └─ MichelsonScreenView     visuals        (src/michelson/view/)
+            ├─ MichelsonScreenSummaryContent     (PDOM overview — reference a11y pattern)
+            └─ MichelsonKeyboardHelpContent      (keyboard help dialog)
 
 src/common/
-  ├─ SimPanel.ts           pre-themed panel (uses SimColors)
-  ├─ SimButtonOptions.ts   flat button / combo-box option bundles
+  ├─ InterferometryLabPanel.ts           pre-themed panel (uses InterferometryLabColors)
+  ├─ InterferometryLabButtonOptions.ts   flat button / combo-box option bundles
   └─ TimeModel.ts          composable play/pause + elapsed time
 
 src/preferences/
-  ├─ SimPreferencesModel   sim-specific pref state
-  ├─ SimPreferencesNode    pref UI in Preferences → Simulation
-  └─ simQueryParameters    QueryStringMachine declarations
+  ├─ InterferometryLabPreferencesModel   sim-specific pref state
+  ├─ InterferometryLabPreferencesNode    pref UI in Preferences → Simulation
+  └─ interferometryLabQueryParameters    QueryStringMachine declarations
 ```
 
 Data flows Model → View through AXON `Property` objects (`.link()` / `.lazyLink()`). The view never
@@ -61,14 +61,14 @@ Or from the workspace: `Baton/scripts/create-sim.sh --repo MySim --name "My Simu
 
 ## Common components (keep when forking)
 
-### SimPanel
+### InterferometryLabPanel
 
-Every control panel should use `SimPanel` so projector-mode switching is automatic:
+Every control panel should use `InterferometryLabPanel` so projector-mode switching is automatic:
 
 ```typescript
-import { SimPanel } from "../../common/SimPanel.js";
-const panel = new SimPanel(content);
-const panelWide = new SimPanel(content, { xMargin: 20 });
+import { InterferometryLabPanel } from "../../common/InterferometryLabPanel.js";
+const panel = new InterferometryLabPanel(content);
+const panelWide = new InterferometryLabPanel(content, { xMargin: 20 });
 ```
 
 ### TimeModel
@@ -89,19 +89,19 @@ export class MyModel implements TModel {
 
 Wire `TimeControlNode` to `model.timer.isPlayingProperty` in the view.
 
-### SimButtonOptions
+### InterferometryLabButtonOptions
 
 Spread flat button options into every push/round button and `TimeControlNode` (see `CLAUDE.md`).
-Use `SIM_COMBO_BOX_OPTIONS` + `LIGHT_SURFACE_TEXT_FILL` for light control surfaces on dark panels.
+Use `INTERFEROMETRY_LAB_COMBO_BOX_OPTIONS` + `LIGHT_SURFACE_TEXT_FILL` for light control surfaces on dark panels.
 
 ## Accessibility (reference implementation)
 
 The template is the **canonical OpenPhysics a11y reference**:
 
 - PDOM `accessibleName` on interactive nodes (prefer live `StringProperty`s).
-- `SimScreenSummaryContent` with a live `currentDetailsContent` `DerivedProperty` over model state.
-- Explicit `pdomOrder` + `SimKeyboardHelpContent`.
-- Strings under `a11y` in locale JSON → `StringManager.getA11yStrings()`.
+- `MichelsonScreenSummaryContent` with a live `currentDetailsContent` `DerivedProperty` over model state.
+- Explicit `pdomOrder` + `MichelsonKeyboardHelpContent`.
+- Strings under `a11y` in locale JSON → `StringManager.getMichelsonA11yStrings()`.
 
 Full checklist: [Baton/ACCESSIBILITY.md](https://github.com/OpenPhysics/Baton/blob/main/ACCESSIBILITY.md).
 
@@ -120,8 +120,8 @@ Run `npm test`. Expand `memory-leak.test.ts` when adding runtime-created nodes o
 ## Multi-screen simulations
 
 Default is single-screen. To add screens, see **`doc/multi-screen.md`**: per-screen folders mirroring
-`src/sim-screen/`, `StringManager` screen-name getters, optional shared root model, a shared
-`src/common/{SimName}ScreenIcons.ts` module (`create{Screen}Icon()` factories wired as
+`src/michelson/`, `StringManager` screen-name getters, optional shared root model, a shared
+`src/common/InterferometryLabScreenIcons.ts` module (`create{Screen}Icon()` factories wired as
 `homeScreenIcon` / `navigationBarIcon`), and register all screens in `main.ts`.
 
 ## PWA
@@ -130,6 +130,6 @@ After `npm run build`, the sim is installable offline via Workbox (`dist/manifes
 
 ## Known template stubs (remove when forking)
 
-- `SimModel.step()` / `reset()` — empty placeholders until you add physics.
-- Placeholder play-area content in `SimScreenView` — replace with real UI.
+- `MichelsonModel.step()` / `reset()` — empty placeholders until you add physics.
+- Placeholder play-area content in `MichelsonScreenView` — replace with real UI.
 - `tests/TimeModel.test.ts` — sample only; add tests for your model under `tests/`.

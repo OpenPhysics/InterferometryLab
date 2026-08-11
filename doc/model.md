@@ -1,4 +1,4 @@
-# Model - SceneryStack Template
+# Model - Interferometry Lab
 
 This document describes the model (the underlying physics, math, and behavior) for the simulation, in
 terms appropriate for an educator. It is the companion to
@@ -17,7 +17,7 @@ away. Write for a teacher, not a programmer — avoid code and class names.*
 and angle. Students see how the component of gravity parallel to the surface sets acceleration and
 how static vs kinetic friction limits motion."
 
-The template's `SimModel` is an empty coordinator — replace it with real state and a `step(dt)` /
+The template's `MichelsonModel` is an empty coordinator — replace it with real state and a `step(dt)` /
 `reset()` that implement your physics.
 
 ## Quantities and units

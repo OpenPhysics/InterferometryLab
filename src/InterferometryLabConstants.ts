@@ -1,5 +1,5 @@
 /**
- * SimConstants.ts
+ * InterferometryLabConstants.ts
  *
  * Central repository for every named numeric constant used across the
  * simulation. Bare numbers that carry semantic meaning (sizes, margins,
@@ -11,13 +11,13 @@
  *  - Physics / model values use SI units (metres, seconds, kilograms, …);
  *    note the unit in a comment on each value.
  *  - Layout / chrome values are in screen pixels.
- *  - Colour strings live in SimColors.ts, not here.
+ *  - Colour strings live in InterferometryLabColors.ts, not here.
  *  - Computed expressions (e.g. `2 * Math.PI`) may stay inline.
  *
  * Remove the example constants below and replace them with the sim's own.
  */
 
-import SimNamespace from "./SimNamespace.js";
+import InterferometryLabNamespace from "./InterferometryLabNamespace.js";
 
 // ── Layout / chrome (screen pixels) ───────────────────────────────────────────
 
@@ -31,7 +31,7 @@ export const PANEL_CORNER_RADIUS = 6;
 
 // Example: export const GRAVITY_MPS2 = 9.81; // m/s²
 
-SimNamespace.register("SimConstants", {
+InterferometryLabNamespace.register("InterferometryLabConstants", {
   SCREEN_VIEW_MARGIN,
   PANEL_CORNER_RADIUS,
 });

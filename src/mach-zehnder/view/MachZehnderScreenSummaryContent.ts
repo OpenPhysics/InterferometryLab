@@ -1,5 +1,5 @@
 /**
- * SimScreenSummaryContent.ts
+ * MachZehnderScreenSummaryContent.ts
  *
  * The accessible screen summary read by screen readers (SceneryStack's
  * Interactive Description). It appears at the top of the parallel DOM and gives
@@ -21,13 +21,13 @@
  */
 import { ScreenSummaryContent } from "scenerystack/sim";
 import { StringManager } from "../../i18n/StringManager.js";
-import type { SimModel } from "../model/SimModel.js";
+import type { MachZehnderModel } from "../model/MachZehnderModel.js";
 
-export class SimScreenSummaryContent extends ScreenSummaryContent {
+export class MachZehnderScreenSummaryContent extends ScreenSummaryContent {
   // `model` is unused in the template but kept in the signature so real sims can
   // derive a live currentDetailsContent from it without changing call sites.
-  public constructor(_model: SimModel) {
-    const a11y = StringManager.getInstance().getA11yStrings();
+  public constructor(_model: MachZehnderModel) {
+    const a11y = StringManager.getInstance().getMachZehnderA11yStrings();
 
     super({
       playAreaContent: a11y.screenSummary.playAreaStringProperty,

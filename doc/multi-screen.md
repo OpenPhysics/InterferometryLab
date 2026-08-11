@@ -1,15 +1,15 @@
 # Multi-Screen Simulations
 
-This template ships as a **single-screen** prototype (`src/sim-screen/`). New sims
-should call `npm run scaffold-screens` (or `Baton/scripts/create-sim.sh`) so screen
-folders use fleet naming (`src/intro/`, not `intro-screen/`). This guide covers the
-architecture and how to extend an existing sim by hand.
+This sim was scaffolded by `npm run scaffold-screens` into `src/michelson/`, `src/mach-zehnder/`, `src/fabry-perot/` (fleet naming:
+kebab folders with no `-screen` suffix). This guide covers the architecture and how to add
+another screen by hand.
 
 ---
 
 ## Automated scaffold (preferred)
 
-After `npm run rename` (or via `create-sim.sh`):
+Already run for this sim — the prototype folder is gone, so a second run exits early.
+Kept as reference for the next sim:
 
 ```sh
 # One screen named after the sim (default when --screens is omitted)
@@ -25,10 +25,10 @@ npm run scaffold-screens -- --screens Intro,Lab --shared-model
 
 The scaffolder:
 
-1. Copies the `sim-screen/` prototype into `src/<kebab>/` per screen
+1. Copies the `michelson/` prototype into `src/<kebab>/` per screen
 2. Writes `src/common/{Prefix}ScreenIcons.ts` stubs and wires icons on each Screen
 3. Updates `main.ts`, locale JSON (`screens` + nested `a11y`), and `StringManager`
-4. Removes the prototype `sim-screen/` folder
+4. Removes the prototype `michelson/` folder
 
 Then always:
 
@@ -49,9 +49,9 @@ Independent models by default. Pass `--shared-model` to emit
 
 ```
 main.ts
-  └─ SimScreen            (Screen<SimModel, SimScreenView>)
-       ├─ SimModel         owns all state
-       └─ SimScreenView    owns all visuals
+  └─ MichelsonScreen            (Screen<MichelsonModel, MichelsonScreenView>)
+       ├─ MichelsonModel         owns all state
+       └─ MichelsonScreenView    owns all visuals
 ```
 
 ### Multi-screen with independent state (simplest)
@@ -157,7 +157,7 @@ src/
 ```
 
 Each screen file follows the same `Screen<Model, View>` pattern as the
-template's `SimScreen.ts`. Screen icons live in one shared module under
+template's `MichelsonScreen.ts`. Screen icons live in one shared module under
 `src/common/` (see [Home screen icons](#home-screen-icons)) — do **not** put
 a `*ScreenIcon.ts` next to each screen.
 
@@ -209,12 +209,12 @@ const screens = [
   new IntroScreen({
     name: stringManager.getScreenNames().introStringProperty,
     tandem: Tandem.ROOT.createTandem("introScreen"),
-    backgroundColorProperty: SimColors.backgroundColorProperty,
+    backgroundColorProperty: InterferometryLabColors.backgroundColorProperty,
   }),
   new LabScreen({
     name: stringManager.getScreenNames().labStringProperty,
     tandem: Tandem.ROOT.createTandem("labScreen"),
-    backgroundColorProperty: SimColors.backgroundColorProperty,
+    backgroundColorProperty: InterferometryLabColors.backgroundColorProperty,
   }),
 ];
 
@@ -252,7 +252,7 @@ back to a generic placeholder.
 Put **all** screen icons in one module:
 
 ```
-src/common/{SimName}ScreenIcons.ts
+src/common/InterferometryLabScreenIcons.ts
 ```
 
 Export one factory per screen named `create{Screen}Icon()`:

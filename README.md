@@ -1,4 +1,4 @@
-# SceneryStack Template
+# Interferometry Lab
 
 A reusable SceneryStack simulation template for one or N screens, built with
 [SceneryStack](https://scenerystack.org/), Vite 8, TypeScript 7, and Biome 2.
@@ -36,7 +36,7 @@ npm start        # dev server → http://localhost:5173
 | `npm run fix` | Lint + auto-fix |
 | `npm run icons` | Regenerate PNG icons from `public/icons/icon.svg` |
 | `npm run rename` | Sim-level fork/rename (`--id`, `--name`) |
-| `npm run scaffold-screens` | Emit N fleet-named screen packages from `sim-screen/` (`--shared-model` optional) |
+| `npm run scaffold-screens` | Emit N fleet-named screen packages from `michelson/` (`--shared-model` optional) |
 | `npm run clean` | Remove `dist/` |
 
 New sims start at `version: "0.0.0"` in `package.json`. Bump only when cutting a release (for example `npm version patch` and a matching git tag). Keep `name` in kebab-case; it is separate from the SceneryStack sim identifier in `src/init.ts`.

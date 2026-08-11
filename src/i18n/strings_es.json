@@ -1,17 +1,43 @@
 {
-  "title": "Plantilla de Simulación",
+  "title": "Interferometry Lab",
   "screens": {
-    "sim": "Sim"
+    "michelson": "Michelson",
+    "machZehnder": "Mach-Zehnder",
+    "fabryPerot": "Fabry-Perot"
   },
   "a11y": {
-    "screenSummary": {
-      "playArea": "El área de juego muestra el contenido principal de la simulación.",
-      "controlArea": "El área de control tiene un botón Restablecer todo que devuelve la simulación a su estado inicial.",
-      "interactionHint": "Explora la simulación interactuando con sus controles."
+    "michelson": {
+      "screenSummary": {
+        "playArea": "El área de juego muestra el contenido principal de la simulación.",
+        "controlArea": "El área de control tiene un botón Restablecer todo que devuelve la simulación a su estado inicial.",
+        "interactionHint": "Explora la simulación interactuando con sus controles."
+      },
+      "currentDetails": "La simulación está en su estado inicial.",
+      "controls": {
+        "exampleControl": "Control de ejemplo"
+      }
     },
-    "currentDetails": "La simulación está en su estado inicial.",
-    "controls": {
-      "exampleControl": "Control de ejemplo"
+    "machZehnder": {
+      "screenSummary": {
+        "playArea": "El área de juego muestra el contenido principal de la simulación.",
+        "controlArea": "El área de control tiene un botón Restablecer todo que devuelve la simulación a su estado inicial.",
+        "interactionHint": "Explora la simulación interactuando con sus controles."
+      },
+      "currentDetails": "La simulación está en su estado inicial.",
+      "controls": {
+        "exampleControl": "Control de ejemplo"
+      }
+    },
+    "fabryPerot": {
+      "screenSummary": {
+        "playArea": "El área de juego muestra el contenido principal de la simulación.",
+        "controlArea": "El área de control tiene un botón Restablecer todo que devuelve la simulación a su estado inicial.",
+        "interactionHint": "Explora la simulación interactuando con sus controles."
+      },
+      "currentDetails": "La simulación está en su estado inicial.",
+      "controls": {
+        "exampleControl": "Control de ejemplo"
+      }
     }
   },
   "preferences": {

@@ -1,16 +1,15 @@
 {
-  "name": "scenerystack-template",
+  "name": "interferometry-lab",
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "description": "GitHub template for OpenPhysics SceneryStack sims (rename + scaffold-screens for one or N screens).",
+  "description": "Physical-optics simulation of Michelson, Mach-Zehnder, and Fabry-Perot interferometers: optical path length, phase, coherence, and fringe formation.",
   "license": "AGPL-3.0-or-later",
   "repository": {
     "type": "git",
-    "url": "https://github.com/OpenPhysics/SceneryStackTemplate.git"
+    "url": "https://github.com/OpenPhysics/InterferometryLab.git"
   },
   "keywords": [
-    "template",
     "simulation",
     "SceneryStack",
     "interactive",

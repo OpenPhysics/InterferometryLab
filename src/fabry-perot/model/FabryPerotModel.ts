@@ -1,5 +1,5 @@
 /**
- * SimModel.ts
+ * FabryPerotModel.ts
  *
  * The top-level model for the simulation screen.
  *
@@ -22,7 +22,7 @@
  */
 import type { TModel } from "scenerystack/joist";
 
-export class SimModel implements TModel {
+export class FabryPerotModel implements TModel {
   /**
    * Resets all model state to initial values.
    * Called when the user presses the Reset All button.

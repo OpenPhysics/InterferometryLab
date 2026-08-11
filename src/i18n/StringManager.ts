@@ -77,28 +77,30 @@ export class StringManager {
    * Each property updates automatically when the locale changes.
    */
   public getScreenNames(): {
-    readonly simStringProperty: ReadOnlyProperty<string>;
+    readonly michelsonStringProperty: ReadOnlyProperty<string>;
+    readonly machZehnderStringProperty: ReadOnlyProperty<string>;
+    readonly fabryPerotStringProperty: ReadOnlyProperty<string>;
   } {
     return {
-      simStringProperty: stringProperties.screens.simStringProperty,
+      michelsonStringProperty: stringProperties.screens.michelsonStringProperty,
+      machZehnderStringProperty: stringProperties.screens.machZehnderStringProperty,
+      fabryPerotStringProperty: stringProperties.screens.fabryPerotStringProperty,
     };
   }
 
-  /**
-   * Accessibility (Interactive Description) StringProperties.
-   *
-   * Returns the reactive `a11y` string tree used by the parallel DOM:
-   *   - `screenSummary.*` — play-area / control-area overview and an interaction
-   *     hint, read by `SimScreenSummaryContent`.
-   *   - `currentDetails` — a paragraph describing the simulation's current state.
-   *     In a real sim, derive a live version from model Properties (see
-   *     LunarLander's ScreenSummaryContent for the canonical pattern).
-   *
-   * Add `accessibleName` / `accessibleHelpText` strings for individual controls
-   * to the `a11y` group too, then read them through this same nested tree.
-   */
-  public getA11yStrings() {
-    return stringProperties.a11y;
+  /** Accessibility strings for the Michelson screen. */
+  public getMichelsonA11yStrings() {
+    return stringProperties.a11y.michelson;
+  }
+
+  /** Accessibility strings for the Mach-Zehnder screen. */
+  public getMachZehnderA11yStrings() {
+    return stringProperties.a11y.machZehnder;
+  }
+
+  /** Accessibility strings for the Fabry-Perot screen. */
+  public getFabryPerotA11yStrings() {
+    return stringProperties.a11y.fabryPerot;
   }
 
   /**

@@ -157,7 +157,7 @@ import { init, madeWithSceneryStackSplashDataURI } from "scenerystack/init";
 
 init({
   // Change to match your package.json "name" when forking the template.
-  name: "scenerystack-template",
+  name: "interferometry-lab",
   version: "1.0.0-test",
   brand: "made-with-scenerystack",
   locale: "en",

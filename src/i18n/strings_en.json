@@ -1,17 +1,43 @@
 {
-  "title": "SceneryStack Template",
+  "title": "Interferometry Lab",
   "screens": {
-    "sim": "Sim"
+    "michelson": "Michelson",
+    "machZehnder": "Mach-Zehnder",
+    "fabryPerot": "Fabry-Perot"
   },
   "a11y": {
-    "screenSummary": {
-      "playArea": "The play area shows the main simulation content.",
-      "controlArea": "The control area has a Reset All button that returns the simulation to its starting state.",
-      "interactionHint": "Explore the simulation by interacting with its controls."
+    "michelson": {
+      "screenSummary": {
+        "playArea": "The play area shows the main simulation content.",
+        "controlArea": "The control area has a Reset All button that returns the simulation to its starting state.",
+        "interactionHint": "Explore the simulation by interacting with its controls."
+      },
+      "currentDetails": "The simulation is in its initial state.",
+      "controls": {
+        "exampleControl": "Example control"
+      }
     },
-    "currentDetails": "The simulation is in its initial state.",
-    "controls": {
-      "exampleControl": "Example control"
+    "machZehnder": {
+      "screenSummary": {
+        "playArea": "The play area shows the main simulation content.",
+        "controlArea": "The control area has a Reset All button that returns the simulation to its starting state.",
+        "interactionHint": "Explore the simulation by interacting with its controls."
+      },
+      "currentDetails": "The simulation is in its initial state.",
+      "controls": {
+        "exampleControl": "Example control"
+      }
+    },
+    "fabryPerot": {
+      "screenSummary": {
+        "playArea": "The play area shows the main simulation content.",
+        "controlArea": "The control area has a Reset All button that returns the simulation to its starting state.",
+        "interactionHint": "Explore the simulation by interacting with its controls."
+      },
+      "currentDetails": "The simulation is in its initial state.",
+      "controls": {
+        "exampleControl": "Example control"
+      }
     }
   },
   "preferences": {

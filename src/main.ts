@@ -21,24 +21,35 @@ import "./brand.js";
 
 import { onReadyToLaunch, PreferencesModel, Sim } from "scenerystack/sim";
 import { Tandem } from "scenerystack/tandem";
+import { FabryPerotScreen } from "./fabry-perot/FabryPerotScreen.js";
+import InterferometryLabColors from "./InterferometryLabColors.js";
 import { StringManager } from "./i18n/StringManager.js";
-import { SimPreferencesModel } from "./preferences/SimPreferencesModel.js";
-import { SimPreferencesNode } from "./preferences/SimPreferencesNode.js";
-import SimColors from "./SimColors.js";
-import { SimScreen } from "./sim-screen/SimScreen.js";
+import { MachZehnderScreen } from "./mach-zehnder/MachZehnderScreen.js";
+import { MichelsonScreen } from "./michelson/MichelsonScreen.js";
+import { InterferometryLabPreferencesModel } from "./preferences/InterferometryLabPreferencesModel.js";
+import { InterferometryLabPreferencesNode } from "./preferences/InterferometryLabPreferencesNode.js";
 
 onReadyToLaunch(() => {
   const stringManager = StringManager.getInstance();
 
-  // Simulation-specific preferences; initial values come from simQueryParameters.
-  const simPreferences = new SimPreferencesModel(Tandem.ROOT.createTandem("preferences"));
+  // Simulation-specific preferences; initial values come from interferometryLabQueryParameters.
+  const simPreferences = new InterferometryLabPreferencesModel(Tandem.ROOT.createTandem("preferences"));
 
   const screens = [
-    new SimScreen({
-      // The screen name Property updates automatically when the locale changes
-      name: stringManager.getScreenNames().simStringProperty,
-      tandem: Tandem.ROOT.createTandem("simScreen"),
-      backgroundColorProperty: SimColors.backgroundColorProperty,
+    new MichelsonScreen({
+      name: stringManager.getScreenNames().michelsonStringProperty,
+      tandem: Tandem.ROOT.createTandem("michelsonScreen"),
+      backgroundColorProperty: InterferometryLabColors.backgroundColorProperty,
+    }),
+    new MachZehnderScreen({
+      name: stringManager.getScreenNames().machZehnderStringProperty,
+      tandem: Tandem.ROOT.createTandem("machZehnderScreen"),
+      backgroundColorProperty: InterferometryLabColors.backgroundColorProperty,
+    }),
+    new FabryPerotScreen({
+      name: stringManager.getScreenNames().fabryPerotStringProperty,
+      tandem: Tandem.ROOT.createTandem("fabryPerotScreen"),
+      backgroundColorProperty: InterferometryLabColors.backgroundColorProperty,
     }),
   ];
 
@@ -53,7 +64,7 @@ onReadyToLaunch(() => {
       simulationOptions: {
         customPreferences: [
           {
-            createContent: (tandem: Tandem) => new SimPreferencesNode(simPreferences, tandem),
+            createContent: (tandem: Tandem) => new InterferometryLabPreferencesNode(simPreferences, tandem),
           },
         ],
       },
