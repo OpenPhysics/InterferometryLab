@@ -18,8 +18,11 @@
     "bandwidth": "Ancho de banda",
     "coherenceLength": "Longitud de coherencia",
     "pathDifference": "Diferencia de camino",
+    "inWavelengths": "En longitudes de onda",
     "visibility": "Visibilidad de las franjas",
     "intensity": "Intensidad",
+    "intensityProfile": "Intensidad en el detector",
+    "detectorPosition": "Posición en el detector",
     "detector": "Detector",
     "readings": "Lecturas",
     "laser": "Láser",
@@ -41,7 +44,8 @@
     "percent": "{{value}} %",
     "perSecond": "{{value}}/s",
     "plain": "{{value}}",
-    "waves": "{{value}} λ"
+    "waves": "{{value}} λ",
+    "pathDelta": "Δ {{value}}"
   },
   "michelson": {
     "arm": "Espejo móvil",
@@ -58,12 +62,15 @@
     "insertCell": "Insertar la celda de gas",
     "pressure": "Presión",
     "indexOfRefraction": "Índice de refracción",
-    "fringesShifted": "Franjas desplazadas"
+    "fringesShifted": "Franjas desplazadas",
+    "visibilityCurve": "Visibilidad frente a diferencia de camino"
   },
   "machZehnder": {
     "pathImbalance": "Desequilibrio de camino",
     "arms": "Brazos",
-    "tilt": "Inclinar M₂",
+    "tiltHorizontal": "Inclinar M₂ alrededor del eje vertical",
+    "tiltVertical": "Inclinar M₂ alrededor del eje horizontal",
+    "sumOfPorts": "A + B",
     "sample": "Muestra",
     "insertSample": "Insertar la lámina de muestra",
     "thickness": "Espesor",
@@ -101,6 +108,10 @@
     "unresolved": "Las dos líneas no están resueltas"
   },
   "a11y": {
+    "common": {
+      "intensityProfileFringes": "Un trazo de la intensidad por el centro del detector: {{count}} franjas brillantes, con un contraste de {{contrast}}.",
+      "intensityProfileFlat": "Un trazo de la intensidad por el centro del detector. Es plano: todo el campo está sobre una sola franja."
+    },
     "michelson": {
       "screenSummary": {
         "playArea": "Un interferómetro de Michelson sobre una mesa óptica. Un divisor de haz separa en dos la luz de la fuente, la envía a un espejo móvil y a un espejo fijo, y la recombina sobre una pantalla detectora donde se forman las franjas.",
@@ -112,6 +123,7 @@
       "patternStraight": "franjas rectas",
       "patternUniform": "una sola franja que llena todo el campo",
       "patternWashedOut": "ninguna franja, solo luz uniforme",
+      "visibilityCurve": "Una curva de la visibilidad de las franjas frente a la diferencia de camino óptico. La visibilidad es de {{visibility}} en la diferencia de camino actual de {{pathDifference}}, y la longitud de coherencia de la fuente es de {{coherenceLength}}.",
       "controls": {
         "sourcePicker": "Fuente de luz",
         "wavelength": "Longitud de onda de la fuente",
@@ -137,6 +149,7 @@
       "classicalDetail": "El haz es continuo.",
       "photonDetail": "Se han emitido {{emitted}} fotones; {{countsA}} llegaron al puerto A y {{countsB}} al puerto B.",
       "whichPathDetail": "El marcador de camino está activado, así que los dos caminos ya no interfieren.",
+      "profileComplementary": " Los dos puertos están en oposición de fase, y su suma es la misma en todas partes.",
       "controls": {
         "sourcePicker": "Fuente de luz",
         "wavelength": "Longitud de onda de la fuente",
@@ -177,7 +190,7 @@
   },
   "preferences": {
     "title": "Simulación",
-    "showOpticalPath": "Mostrar los caminos ópticos",
-    "showOpticalPathDescription": "Etiquetar cada tramo del haz en la mesa con el camino óptico que acumula."
+    "showOpticalPath": "Mostrar las contribuciones a la diferencia de camino",
+    "showOpticalPathDescription": "Etiquetar cada elemento óptico de la mesa con lo que añade a la diferencia de camino."
   }
 }

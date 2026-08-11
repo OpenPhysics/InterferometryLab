@@ -64,6 +64,51 @@ shared physics module.
 **Repaint policy.** The pattern is repainted when its `FringeSpec` changes, not on a clock. A
 static scene costs nothing.
 
+## The charts share the renderer's physics, not a copy of it
+
+Three screens now carry a quantitative second view alongside the detector image:
+`IntensityProfileNode` (Michelson and Mach-Zehnder), `CoherenceEnvelopeNode` (Michelson) and the
+older `TransmissionSpectrumNode` (Fabry-Pérot). All three are bamboo charts built the same way —
+`ChartTransform` + `ChartRectangle` + `LinePlot`, redrawn from a `Multilink` on the model
+Properties they read.
+
+None of them re-implements any physics. The intensity trace calls `intensityProfile()` in
+`common/model/fringeIntensity.ts`, which is a thin loop over the same `intensityAt()` the renderer
+uses per pixel; the visibility curve calls `spectrumVisibility()` from `spectrum.ts`, the same
+function behind the Michelson's visibility readout. Sampling the physics from the model layer
+rather than the view is what lets `tests/fringeIntensity.test.ts` assert that the two Mach-Zehnder
+ports' profiles sum to a constant — the claim `doc/model.md` §6 makes and the dashed total on that
+chart draws.
+
+**Both charts pad their value axis past the reachable range** (−0.06 to 1.08 rather than 0 to 1).
+The traces that matter most are the flat ones: a dark port pinned at zero, a constant total pinned
+at one, a laser's visibility flat at full contrast. Drawn hard against the frame those read as an
+empty box rather than as a result, so the padding and the half-scale gridlines are what make "flat"
+legible as an answer.
+
+**The coherence curve rescales itself**, because a laser's coherence length is 200 mm and white
+light's is a micrometre and both have to be readable. The span comes from the source's own feature
+scale — the smaller of its coherence length and, for a doublet, its beat period `λ₀²/δλ` — clamped
+to the mirror stage's reach. This is the same trick `TransmissionSpectrumNode` already used to zoom
+around a line separation.
+
+**Dispose is not optional here.** Each chart links Properties it does not own, and so do the
+formatter Properties feeding its `accessibleParagraph`. Disposing only the multilink leaves those
+intermediates listening, which keeps the node reachable from a model that has outlived it;
+`tests/memory-leak.test.ts` covers both nodes for exactly that.
+
+## Time controls
+
+`common/TimeModel.ts` is composed into the two models that evolve on their own: `MachZehnderModel`
+(starting played, so photons flow immediately) and `FabryPerotModel` (starting paused). Each also
+exposes `stepOnce()`, which advances one frame's worth regardless of the clock — a handful of
+photons, or a three-hundredth of a cavity sweep. `createTimeControl()` in `controlFactory.ts` binds
+both to a `TimeControlNode`.
+
+The Fabry-Pérot's "Scan the spacing" checkbox was replaced by that control rather than joined to
+it: `scanningProperty` and `timer.isPlayingProperty` would have been two ways to stop the same
+sweep.
+
 ## Colour is computed in linear light through CIE XYZ
 
 `src/common/view/spectralColor.ts` converts wavelengths to colour and adds them the way light
@@ -105,6 +150,7 @@ src/
       SourceType.ts
     view/
       FringePatternNode.ts         the renderer
+      IntensityProfileNode.ts      intensity across a cut through the detector
       DetectorScreenNode.ts        bezelled detector + overlay layer
       OpticalTableNode.ts          breadboard background
       BeamPathNode.ts              a beam: bright core in a soft halo
@@ -145,15 +191,16 @@ several thousand of them, they are never interactive, and at that size the path 
 
 ## Tests
 
-124 vitest specs under `tests/`, environment `happy-dom` with the template's `tests/setup.ts`.
+138 vitest specs under `tests/`, environment `happy-dom` with the template's `tests/setup.ts`.
 
 | File | Covers |
 |---|---|
 | `spectrum.test.ts` | coherence length, visibility envelopes, doublet beats, line splitting |
+| `fringeIntensity.test.ts` | …and `intensityProfile`, including the two ports summing to a constant |
 | `fringeIntensity.test.ts` | detector geometry, two-beam and Airy intensity, finesse |
 | `refractiveIndex.test.ts` | Sellmeier against published indices, Gladstone-Dale, tilted plates |
 | `interferometerModels.test.ts` | all three screen models: derived values, controls, reset |
-| `memory-leak.test.ts` | dispose/WeakRef regression, extended to the two listening nodes |
+| `memory-leak.test.ts` | dispose/WeakRef regression, extended to the four listening nodes |
 | `TimeModel.test.ts` | template model retained |
 
 Several assertions are anchored to published numbers rather than to the implementation — N-BK7's

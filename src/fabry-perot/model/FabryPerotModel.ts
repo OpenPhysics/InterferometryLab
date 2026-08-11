@@ -35,6 +35,7 @@ import type { TModel } from "scenerystack/joist";
 import { type FringeSpec, toFringeGroups } from "../../common/model/FringeSpec.js";
 import { airyPeakTransmission, reflectiveFinesse } from "../../common/model/fringeIntensity.js";
 import type { SpectralGroup } from "../../common/model/spectrum.js";
+import { TimeModel } from "../../common/TimeModel.js";
 import {
   ABSORPTANCE_RANGE,
   CAVITY_SPACING_RANGE_UM,
@@ -62,6 +63,9 @@ const SCAN_AMPLITUDE_WAVES = 1.5;
 
 /** Scan period, seconds. */
 const SCAN_PERIOD_S = 6;
+
+/** One frame's worth of sweep, seconds — what the step-forward button advances. */
+const MANUAL_STEP_DT = 1 / 60;
 
 /**
  * Starting spacing, nm: exactly 340 half-waves of the default 589 nm line.
@@ -95,14 +99,26 @@ export class FabryPerotModel implements TModel {
   /** Nominal mirror spacing, nm. */
   public readonly spacingProperty: NumberProperty;
 
-  /** Whether the spacing is being swept, as a scanning etalon does. */
-  public readonly scanningProperty: BooleanProperty;
+  /**
+   * The scan clock. Playing sweeps the spacing the way a scanning etalon's piezo
+   * does; paused, the cavity holds still. Being able to stop on a transmission
+   * peak, and to creep up on one a frame at a time, is what makes the sweep
+   * something to read rather than something to watch go past.
+   */
+  public readonly timer = new TimeModel();
 
   /** Sweep offset added to the spacing while scanning, nm. */
   public readonly scanOffsetProperty: NumberProperty;
 
   /** Spacing actually in effect, nm. */
   public readonly effectiveSpacingProperty: TReadOnlyProperty<number>;
+
+  /**
+   * Optical path of one round trip inside the cavity, 2nd (nm) — the path
+   * difference between consecutive emerging beams, and the quantity the order
+   * and the free spectral range are both built from.
+   */
+  public readonly roundTripPathProperty: TReadOnlyProperty<number>;
 
   /** The source's spectral lines. */
   public readonly linesProperty: TReadOnlyProperty<readonly SpectralGroup[]>;
@@ -131,9 +147,6 @@ export class FabryPerotModel implements TModel {
   /** The ring pattern on the detector. */
   public readonly fringeSpecProperty: TReadOnlyProperty<FringeSpec>;
 
-  /** Elapsed scan time, seconds. */
-  private scanTime = 0;
-
   public constructor() {
     this.wavelengthProperty = new NumberProperty(589, { range: WAVELENGTH_RANGE_NM, units: "nm" });
     this.twinLineProperty = new BooleanProperty(false);
@@ -146,12 +159,16 @@ export class FabryPerotModel implements TModel {
       units: "nm",
     });
 
-    this.scanningProperty = new BooleanProperty(false);
     this.scanOffsetProperty = new NumberProperty(0, { units: "nm" });
 
     this.effectiveSpacingProperty = new DerivedProperty(
       [this.spacingProperty, this.scanOffsetProperty],
       (spacing, offset) => spacing + offset,
+    );
+
+    this.roundTripPathProperty = new DerivedProperty(
+      [this.effectiveSpacingProperty],
+      (spacing) => 2 * CAVITY_INDEX * spacing,
     );
 
     this.linesProperty = new DerivedProperty(
@@ -246,23 +263,33 @@ export class FabryPerotModel implements TModel {
     this.reflectanceProperty.reset();
     this.absorptanceProperty.reset();
     this.spacingProperty.reset();
-    this.scanningProperty.reset();
     this.scanOffsetProperty.reset();
-    this.scanTime = 0;
+    this.timer.reset();
   }
 
   /**
-   * Sweeps the spacing when scanning is on. A real scanning Fabry-Pérot pushes
-   * one mirror with a piezo through a wavelength or two, so the transmission
-   * peaks march across the source's spectrum and the rings collapse into the
-   * centre — the trace this produces *is* the measured spectrum.
+   * Sweeps the spacing while the scan clock is running. A real scanning
+   * Fabry-Pérot pushes one mirror with a piezo through a wavelength or two, so
+   * the transmission peaks march across the source's spectrum and the rings
+   * collapse into the centre — the trace this produces *is* the measured
+   * spectrum.
+   *
+   * The clock only advances while playing, so a paused cavity holds the spacing
+   * it stopped at rather than snapping back.
    */
   public step(dt: number): void {
-    if (!this.scanningProperty.value) {
-      return;
-    }
-    this.scanTime += dt;
-    const phase = (2 * Math.PI * this.scanTime) / SCAN_PERIOD_S;
+    this.timer.step(dt);
+    this.updateScanOffset();
+  }
+
+  /** Advances the sweep by one frame regardless of the clock — the step button. */
+  public stepOnce(): void {
+    this.timer.timeProperty.value += MANUAL_STEP_DT;
+    this.updateScanOffset();
+  }
+
+  private updateScanOffset(): void {
+    const phase = (2 * Math.PI * this.timer.timeProperty.value) / SCAN_PERIOD_S;
     this.scanOffsetProperty.value = SCAN_AMPLITUDE_WAVES * this.wavelengthProperty.value * 0.5 * Math.sin(phase);
   }
 }

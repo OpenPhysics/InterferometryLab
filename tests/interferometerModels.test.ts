@@ -11,10 +11,12 @@ import { intensityAt, reflectiveFinesse } from "../src/common/model/fringeIntens
 import { buildSpectrum } from "../src/common/model/LightSourceModel.js";
 import { gasIndex } from "../src/common/model/refractiveIndex.js";
 import { SourceType } from "../src/common/model/SourceType.js";
+import { spectrumVisibility } from "../src/common/model/spectrum.js";
 import { FabryPerotModel } from "../src/fabry-perot/model/FabryPerotModel.js";
 import {
   GAS_CELL_LENGTH_NM,
   HENE_WAVELENGTH_NM,
+  MICHELSON_COARSE_RANGE_NM,
   NM_PER_UM,
   STANDARD_PRESSURE_KPA,
 } from "../src/InterferometryLabConstants.js";
@@ -42,6 +44,20 @@ describe("buildSpectrum", () => {
     expect(spectrum.doubletSeparationNm).toBeCloseTo(0.597, 3);
   });
 
+  it("puts the sodium lamp's first visibility null inside the mirror's travel", () => {
+    // What the Michelson's visibility curve is there to show. The D lines beat
+    // rather than decay, with the first null at λ₀²/2δλ ≈ 291 µm of path
+    // difference and a full revival at twice that. Both have to be reachable, or
+    // the classic measurement of the doublet spacing cannot be done on this
+    // screen at all: the stage travels ±0.2 mm, worth ±0.4 mm of path difference.
+    const spectrum = buildSpectrum(SourceType.SODIUM_LAMP, 550, 10);
+    const firstNullNm = (spectrum.centerNm * spectrum.centerNm) / (2 * spectrum.doubletSeparationNm);
+
+    expect(firstNullNm).toBeLessThan(2 * MICHELSON_COARSE_RANGE_NM.max);
+    expect(spectrumVisibility(spectrum.groups, firstNullNm)).toBeLessThan(0.05);
+    expect(spectrumVisibility(spectrum.groups, 2 * firstNullNm)).toBeGreaterThan(0.9);
+  });
+
   it("splits white light into many groups spanning the visible band", () => {
     const spectrum = buildSpectrum(SourceType.WHITE_LIGHT, 550, 10);
     expect(spectrum.groups.length).toBeGreaterThan(5);
@@ -63,6 +79,20 @@ describe("MichelsonModel", () => {
     model.fineOffsetProperty.value = 250;
     expect(model.mirrorOffsetProperty.value).toBeCloseTo(1250, 10);
     expect(model.pathDifferenceProperty.value).toBeCloseTo(2500, 10);
+  });
+
+  it("splits the path difference into the mirror's contribution and the cell's", () => {
+    const model = new MichelsonModel();
+    model.coarseOffsetProperty.value = 1000;
+    model.fineOffsetProperty.value = 0;
+    model.gasCellEnabledProperty.value = true;
+
+    // The two labelled contributions are the whole of the path difference.
+    expect(model.mirrorPathProperty.value).toBeCloseTo(2000, 10);
+    expect(model.pathDifferenceProperty.value).toBeCloseTo(
+      model.mirrorPathProperty.value + model.gasCellOpdProperty.value,
+      10,
+    );
   });
 
   it("zeroes the arms when asked", () => {
@@ -284,6 +314,39 @@ describe("MachZehnderModel", () => {
     expect(fractionA).toBeLessThan(0.6);
   });
 
+  it("emits no photons while the clock is paused, and resumes when it is played", () => {
+    const model = new MachZehnderModel();
+    model.beamModeProperty.value = BeamMode.SINGLE_PHOTON;
+    model.timer.isPlayingProperty.value = false;
+
+    model.step(1);
+    expect(model.photonsEmittedProperty.value).toBe(0);
+
+    model.timer.isPlayingProperty.value = true;
+    model.step(1);
+    expect(model.photonsEmittedProperty.value).toBeGreaterThan(0);
+  });
+
+  it("emits a frame's worth of photons per manual step while paused", () => {
+    const model = new MachZehnderModel();
+    model.beamModeProperty.value = BeamMode.SINGLE_PHOTON;
+    model.timer.isPlayingProperty.value = false;
+    model.photonRateProperty.value = 600;
+
+    // 600 per second at one sixtieth of a second is exactly ten per press.
+    model.stepOnce();
+    expect(model.photonsEmittedProperty.value).toBe(10);
+    model.stepOnce();
+    expect(model.photonsEmittedProperty.value).toBe(20);
+  });
+
+  it("loses all fringe visibility once the paths are marked", () => {
+    const model = new MachZehnderModel();
+    expect(model.visibilityProperty.value).toBeCloseTo(1, 6);
+    model.whichPathProperty.value = true;
+    expect(model.visibilityProperty.value).toBe(0);
+  });
+
   it("clears the counts and the accumulated marks", () => {
     const model = new MachZehnderModel();
     model.beamModeProperty.value = BeamMode.SINGLE_PHOTON;
@@ -307,6 +370,16 @@ describe("FabryPerotModel", () => {
     const before = model.finesseProperty.value;
     model.spacingProperty.value = 30 * NM_PER_UM;
     expect(model.finesseProperty.value).toBeCloseTo(before, 10);
+  });
+
+  it("reports the round trip 2nd, which is the order times the wavelength", () => {
+    const model = new FabryPerotModel();
+    model.spacingProperty.value = 100 * NM_PER_UM;
+    expect(model.roundTripPathProperty.value).toBeCloseTo(2 * 100 * NM_PER_UM, 10);
+    expect(model.orderProperty.value).toBeCloseTo(
+      model.roundTripPathProperty.value / model.wavelengthProperty.value,
+      6,
+    );
   });
 
   it("derives the free spectral range as λ²/2nd", () => {
@@ -368,16 +441,24 @@ describe("FabryPerotModel", () => {
     expect(model.peakTransmissionProperty.value).toBeLessThan(0.4);
   });
 
-  it("does not move the spacing unless scanning", () => {
+  it("does not move the spacing while the scan clock is paused", () => {
     const model = new FabryPerotModel();
     const before = model.effectiveSpacingProperty.value;
     model.step(1);
     expect(model.effectiveSpacingProperty.value).toBe(before);
   });
 
+  it("steps the sweep forward while paused, so a peak can be walked onto", () => {
+    const model = new FabryPerotModel();
+    const before = model.scanOffsetProperty.value;
+    model.stepOnce();
+    expect(model.scanOffsetProperty.value).not.toBe(before);
+    expect(model.timer.isPlayingProperty.value).toBe(false);
+  });
+
   it("sweeps the spacing by about a wavelength while scanning", () => {
     const model = new FabryPerotModel();
-    model.scanningProperty.value = true;
+    model.timer.isPlayingProperty.value = true;
     let minimum = Number.POSITIVE_INFINITY;
     let maximum = Number.NEGATIVE_INFINITY;
     for (let i = 0; i < 200; i++) {

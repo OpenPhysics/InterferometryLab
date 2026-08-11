@@ -106,6 +106,12 @@ export class MichelsonModel implements TModel {
   /** Refractive index of the gas in the cell. */
   public readonly gasIndexProperty: TReadOnlyProperty<number>;
 
+  /**
+   * Path difference contributed by the movable mirror alone, nm — twice its
+   * displacement, because the arm is traversed both ways.
+   */
+  public readonly mirrorPathProperty: TReadOnlyProperty<number>;
+
   /** Path difference contributed by the gas cell alone, nm. */
   public readonly gasCellOpdProperty: TReadOnlyProperty<number>;
 
@@ -156,6 +162,8 @@ export class MichelsonModel implements TModel {
       (coarse, fine) => coarse + fine,
     );
 
+    this.mirrorPathProperty = new DerivedProperty([this.mirrorOffsetProperty], (offset) => 2 * offset);
+
     this.gasIndexProperty = new DerivedProperty([this.gasCellPressureProperty], (pressureKPa) =>
       gasIndex(pressureKPa, ROOM_TEMPERATURE_K),
     );
@@ -167,8 +175,8 @@ export class MichelsonModel implements TModel {
     );
 
     this.pathDifferenceProperty = new DerivedProperty(
-      [this.mirrorOffsetProperty, this.gasCellOpdProperty],
-      (offset, cellOpd) => 2 * offset + cellOpd,
+      [this.mirrorPathProperty, this.gasCellOpdProperty],
+      (mirrorPath, cellOpd) => mirrorPath + cellOpd,
     );
 
     this.visibilityProperty = new DerivedProperty(

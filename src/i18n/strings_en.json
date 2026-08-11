@@ -18,8 +18,11 @@
     "bandwidth": "Bandwidth",
     "coherenceLength": "Coherence length",
     "pathDifference": "Path difference",
+    "inWavelengths": "In wavelengths",
     "visibility": "Fringe visibility",
     "intensity": "Intensity",
+    "intensityProfile": "Intensity across the detector",
+    "detectorPosition": "Position on the detector",
     "detector": "Detector",
     "readings": "Readings",
     "laser": "Laser",
@@ -41,7 +44,8 @@
     "percent": "{{value}}%",
     "perSecond": "{{value}}/s",
     "plain": "{{value}}",
-    "waves": "{{value}} λ"
+    "waves": "{{value}} λ",
+    "pathDelta": "Δ {{value}}"
   },
   "michelson": {
     "arm": "Movable Mirror",
@@ -58,12 +62,15 @@
     "insertCell": "Insert the gas cell",
     "pressure": "Pressure",
     "indexOfRefraction": "Index of refraction",
-    "fringesShifted": "Fringes shifted"
+    "fringesShifted": "Fringes shifted",
+    "visibilityCurve": "Visibility vs path difference"
   },
   "machZehnder": {
     "pathImbalance": "Path imbalance",
     "arms": "Arms",
-    "tilt": "Tilt M₂",
+    "tiltHorizontal": "Tilt M₂ about the vertical axis",
+    "tiltVertical": "Tilt M₂ about the horizontal axis",
+    "sumOfPorts": "A + B",
     "sample": "Sample",
     "insertSample": "Insert the sample slide",
     "thickness": "Thickness",
@@ -101,6 +108,10 @@
     "unresolved": "The two lines are not resolved"
   },
   "a11y": {
+    "common": {
+      "intensityProfileFringes": "A trace of intensity across the middle of the detector: {{count}} bright fringes, at {{contrast}} contrast.",
+      "intensityProfileFlat": "A trace of intensity across the middle of the detector. It is flat — the whole field sits on a single fringe."
+    },
     "michelson": {
       "screenSummary": {
         "playArea": "A Michelson interferometer on an optical table. Light from the source is split in two by a beam splitter, sent to a movable mirror and a fixed mirror, and recombined onto a detector screen where it forms fringes.",
@@ -112,6 +123,7 @@
       "patternStraight": "straight fringes",
       "patternUniform": "a single fringe filling the whole field",
       "patternWashedOut": "no fringes, only uniform light",
+      "visibilityCurve": "A curve of fringe visibility against optical path difference. The visibility is {{visibility}} at the current path difference of {{pathDifference}}, and the source's coherence length is {{coherenceLength}}.",
       "controls": {
         "sourcePicker": "Light source",
         "wavelength": "Source wavelength",
@@ -137,6 +149,7 @@
       "classicalDetail": "The beam is continuous.",
       "photonDetail": "{{emitted}} photons have been emitted; {{countsA}} landed at port A and {{countsB}} at port B.",
       "whichPathDetail": "The which-path marker is on, so the two paths no longer interfere.",
+      "profileComplementary": " The two ports are in antiphase, and their sum is the same everywhere.",
       "controls": {
         "sourcePicker": "Light source",
         "wavelength": "Source wavelength",
@@ -177,7 +190,7 @@
   },
   "preferences": {
     "title": "Simulation",
-    "showOpticalPath": "Show optical path lengths",
-    "showOpticalPathDescription": "Label each beam segment on the table with the optical path length it accumulates."
+    "showOpticalPath": "Show path-difference contributions",
+    "showOpticalPathDescription": "Label each optical element on the table with how much it adds to the optical path difference."
   }
 }

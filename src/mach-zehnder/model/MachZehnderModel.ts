@@ -41,6 +41,7 @@ import { LightSourceModel } from "../../common/model/LightSourceModel.js";
 import { plateOpticalPathDelta } from "../../common/model/refractiveIndex.js";
 import { SourceType } from "../../common/model/SourceType.js";
 import { spectrumVisibility } from "../../common/model/spectrum.js";
+import { TimeModel } from "../../common/TimeModel.js";
 import {
   BEAM_HALF_WIDTH_NM,
   DETECTOR_FOCAL_LENGTH_NM,
@@ -62,6 +63,9 @@ const ROUTE_INTENSITY = 0.5;
 
 /** Two equal routes peak at 2; halving puts a bright fringe at full scale. */
 const EXPOSURE = 0.5;
+
+/** One frame's worth of emission, seconds — what the step-forward button advances. */
+const MANUAL_STEP_DT = 1 / 60;
 
 /**
  * A photon landing on a detector: where it hit, in detector coordinates.
@@ -117,6 +121,15 @@ export class MachZehnderModel implements TModel {
   /** Bumped whenever a photon is added, so the view knows to repaint. */
   public readonly photonRevisionProperty: NumberProperty;
 
+  /**
+   * The emission clock. Single photons arrive far too fast to watch: at the
+   * default rate the pattern is drawn in a couple of seconds, and "one photon at
+   * a time" is a claim about a process nobody gets to see happen. Pausing, and
+   * stepping a frame at a time, is what turns the accumulation into something
+   * that can be examined while it is still sparse.
+   */
+  public readonly timer = new TimeModel(true);
+
   /** Optical path added by the sample slide, nm. */
   public readonly samplePathProperty: TReadOnlyProperty<number>;
 
@@ -125,6 +138,9 @@ export class MachZehnderModel implements TModel {
 
   /** Fringe contrast, 0 when the which-path marker is on. */
   public readonly contrastProperty: TReadOnlyProperty<number>;
+
+  /** Fringe visibility at the current path difference, 0–1. */
+  public readonly visibilityProperty: TReadOnlyProperty<number>;
 
   /** Patterns at the two output ports. */
   public readonly portASpecProperty: TReadOnlyProperty<FringeSpec>;
@@ -189,6 +205,14 @@ export class MachZehnderModel implements TModel {
 
     this.contrastProperty = new DerivedProperty([this.whichPathProperty], (whichPath) => (whichPath ? 0 : 1));
 
+    // Two separate losses of contrast multiply here: the which-path marker,
+    // which destroys interference outright, and the source's own coherence
+    // envelope, which fades it as the arms are pulled apart.
+    this.visibilityProperty = new DerivedProperty(
+      [this.contrastProperty, this.lightSource.spectrumProperty, this.pathDifferenceProperty],
+      (contrast, spectrum, pathDifference) => contrast * spectrumVisibility(spectrum.groups, pathDifference),
+    );
+
     const geometryProperty = new DerivedProperty(
       [this.pathDifferenceProperty, this.tiltHorizontalProperty, this.tiltVerticalProperty],
       (pathDifference, tiltHorizontal, tiltVertical) => ({
@@ -228,17 +252,6 @@ export class MachZehnderModel implements TModel {
     this.portBFractionProperty = new DerivedProperty([this.portBSpecProperty], (spec) => portFraction(spec));
   }
 
-  /**
-   * Fringe visibility of the current source at the current path difference.
-   * Exposed for the readouts; the renderer computes it per pixel.
-   */
-  public get visibility(): number {
-    return (
-      this.contrastProperty.value *
-      spectrumVisibility(this.lightSource.spectrumProperty.value.groups, this.pathDifferenceProperty.value)
-    );
-  }
-
   /** Clears the photon counts and the accumulated marks. */
   public clearCounts(): void {
     this.countsAProperty.value = 0;
@@ -261,6 +274,7 @@ export class MachZehnderModel implements TModel {
     this.beamModeProperty.reset();
     this.photonRateProperty.reset();
     this.whichPathProperty.reset();
+    this.timer.reset();
     this.clearCounts();
     this.photonAccumulator = 0;
   }
@@ -275,6 +289,24 @@ export class MachZehnderModel implements TModel {
    * fringes stop appearing.
    */
   public step(dt: number): void {
+    this.timer.step(dt);
+    if (!this.timer.isPlayingProperty.value) {
+      return;
+    }
+    this.emit(dt);
+  }
+
+  /**
+   * Emits one frame's worth of photons regardless of the clock — what the
+   * step-forward button does while paused. At the lowest emission rate a frame
+   * is worth a third of a photon, so stepping really does deliver them one at a
+   * time.
+   */
+  public stepOnce(): void {
+    this.emit(MANUAL_STEP_DT);
+  }
+
+  private emit(dt: number): void {
     if (this.beamModeProperty.value !== BeamMode.SINGLE_PHOTON) {
       return;
     }

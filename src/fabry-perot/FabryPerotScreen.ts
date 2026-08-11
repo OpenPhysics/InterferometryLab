@@ -15,6 +15,7 @@ import { Screen } from "scenerystack/sim";
 import type { Tandem } from "scenerystack/tandem";
 import { createFabryPerotIcon } from "../common/InterferometryLabScreenIcons.js";
 import InterferometryLabColors from "../InterferometryLabColors.js";
+import type { InterferometryLabPreferencesModel } from "../preferences/InterferometryLabPreferencesModel.js";
 import { FabryPerotModel } from "./model/FabryPerotModel.js";
 import { FabryPerotKeyboardHelpContent } from "./view/FabryPerotKeyboardHelpContent.js";
 import { FabryPerotScreenView } from "./view/FabryPerotScreenView.js";
@@ -23,13 +24,18 @@ import { FabryPerotScreenView } from "./view/FabryPerotScreenView.js";
 type FabryPerotScreenOptions = ScreenOptions & { tandem: Tandem };
 
 export class FabryPerotScreen extends Screen<FabryPerotModel, FabryPerotScreenView> {
-  public constructor(options: FabryPerotScreenOptions) {
+  /**
+   * @param preferences - simulation preferences the view reads; the optical-path
+   *                      labels are a preference, so the view needs to see them
+   * @param options
+   */
+  public constructor(preferences: InterferometryLabPreferencesModel, options: FabryPerotScreenOptions) {
     super(
       // Model factory — called once when the screen is first shown
       () => new FabryPerotModel(),
       // View factory — receives the model instance
       (model) =>
-        new FabryPerotScreenView(model, {
+        new FabryPerotScreenView(model, preferences, {
           tandem: options.tandem.createTandem("view"),
         }),
       optionize<FabryPerotScreenOptions, EmptySelfOptions, ScreenOptions>()(

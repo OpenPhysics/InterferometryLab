@@ -182,6 +182,22 @@ const InterferometryLabColors = {
     projector: "#1565a8",
   }),
 
+  /**
+   * A second plot trace, for charts that draw two curves at once — the
+   * Mach-Zehnder's two output ports. Chosen warm against `plotTrace`'s cool blue
+   * so the pair stays distinguishable without relying on hue alone.
+   */
+  plotTraceAltColorProperty: new ProfileColorProperty(InterferometryLabNamespace, "plotTraceAlt", {
+    default: "#ff9e6d",
+    projector: "#b34a12",
+  }),
+
+  /** The dashed total of several traces, drawn quieter than the traces themselves. */
+  plotSumColorProperty: new ProfileColorProperty(InterferometryLabNamespace, "plotSum", {
+    default: "#9aa8bd",
+    projector: "#6b7285",
+  }),
+
   plotAxisColorProperty: new ProfileColorProperty(InterferometryLabNamespace, "plotAxis", {
     default: "#7a86a0",
     projector: "#5a6070",

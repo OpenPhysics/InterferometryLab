@@ -18,8 +18,11 @@
     "bandwidth": "Largeur spectrale",
     "coherenceLength": "Longueur de cohérence",
     "pathDifference": "Différence de marche",
+    "inWavelengths": "En longueurs d'onde",
     "visibility": "Visibilité des franges",
     "intensity": "Intensité",
+    "intensityProfile": "Intensité sur le détecteur",
+    "detectorPosition": "Position sur le détecteur",
     "detector": "Détecteur",
     "readings": "Mesures",
     "laser": "Laser",
@@ -41,7 +44,8 @@
     "percent": "{{value}} %",
     "perSecond": "{{value}}/s",
     "plain": "{{value}}",
-    "waves": "{{value}} λ"
+    "waves": "{{value}} λ",
+    "pathDelta": "Δ {{value}}"
   },
   "michelson": {
     "arm": "Miroir mobile",
@@ -58,12 +62,15 @@
     "insertCell": "Insérer la cuve à gaz",
     "pressure": "Pression",
     "indexOfRefraction": "Indice de réfraction",
-    "fringesShifted": "Franges défilées"
+    "fringesShifted": "Franges défilées",
+    "visibilityCurve": "Visibilité selon la différence de marche"
   },
   "machZehnder": {
     "pathImbalance": "Déséquilibre des bras",
     "arms": "Bras",
-    "tilt": "Incliner M₂",
+    "tiltHorizontal": "Incliner M₂ autour de l'axe vertical",
+    "tiltVertical": "Incliner M₂ autour de l'axe horizontal",
+    "sumOfPorts": "A + B",
     "sample": "Échantillon",
     "insertSample": "Insérer la lame échantillon",
     "thickness": "Épaisseur",
@@ -101,6 +108,10 @@
     "unresolved": "Les deux raies ne sont pas résolues"
   },
   "a11y": {
+    "common": {
+      "intensityProfileFringes": "Un tracé de l'intensité au milieu du détecteur : {{count}} franges brillantes, avec un contraste de {{contrast}}.",
+      "intensityProfileFlat": "Un tracé de l'intensité au milieu du détecteur. Il est plat — tout le champ repose sur une seule frange."
+    },
     "michelson": {
       "screenSummary": {
         "playArea": "Un interféromètre de Michelson sur une table optique. Une séparatrice divise en deux la lumière de la source, l'envoie vers un miroir mobile et un miroir fixe, puis la recombine sur un écran détecteur où se forment les franges.",
@@ -112,6 +123,7 @@
       "patternStraight": "des franges rectilignes",
       "patternUniform": "une seule frange qui remplit tout le champ",
       "patternWashedOut": "aucune frange, seulement une lumière uniforme",
+      "visibilityCurve": "Une courbe de la visibilité des franges en fonction de la différence de marche. La visibilité est de {{visibility}} à la différence de marche actuelle de {{pathDifference}}, et la longueur de cohérence de la source est de {{coherenceLength}}.",
       "controls": {
         "sourcePicker": "Source lumineuse",
         "wavelength": "Longueur d'onde de la source",
@@ -137,6 +149,7 @@
       "classicalDetail": "Le faisceau est continu.",
       "photonDetail": "{{emitted}} photons ont été émis ; {{countsA}} sont arrivés au port A et {{countsB}} au port B.",
       "whichPathDetail": "Le marqueur de chemin est activé, donc les deux chemins n'interfèrent plus.",
+      "profileComplementary": " Les deux ports sont en opposition de phase, et leur somme est partout la même.",
       "controls": {
         "sourcePicker": "Source lumineuse",
         "wavelength": "Longueur d'onde de la source",
@@ -177,7 +190,7 @@
   },
   "preferences": {
     "title": "Simulation",
-    "showOpticalPath": "Afficher les chemins optiques",
-    "showOpticalPathDescription": "Indiquer sur chaque tronçon de faisceau le chemin optique qu'il accumule."
+    "showOpticalPath": "Afficher les contributions à la différence de marche",
+    "showOpticalPathDescription": "Indiquer sur chaque élément optique de la table ce qu'il ajoute à la différence de marche."
   }
 }

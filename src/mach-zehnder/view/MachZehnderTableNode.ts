@@ -14,6 +14,7 @@ import { DerivedProperty } from "scenerystack/axon";
 import { Vector2 } from "scenerystack/dot";
 import { Node } from "scenerystack/scenery";
 import { BeamPathNode } from "../../common/view/BeamPathNode.js";
+import { pathDeltaProperty } from "../../common/view/formatters.js";
 import { OpticalTableNode } from "../../common/view/OpticalTableNode.js";
 import {
   createBeamSplitterNode,
@@ -25,6 +26,7 @@ import {
 } from "../../common/view/opticNodes.js";
 import { sourceColorProperty } from "../../common/view/sourceColor.js";
 import { StringManager } from "../../i18n/StringManager.js";
+import type { InterferometryLabPreferencesModel } from "../../preferences/InterferometryLabPreferencesModel.js";
 import type { MachZehnderModel } from "../model/MachZehnderModel.js";
 
 /** Table size, view pixels. */
@@ -49,7 +51,7 @@ const SAMPLE = new Vector2(230, 68);
 const OPTIC_WIDTH = 42;
 
 export class MachZehnderTableNode extends Node {
-  public constructor(model: MachZehnderModel) {
+  public constructor(model: MachZehnderModel, preferences: InterferometryLabPreferencesModel) {
     super();
 
     const strings = StringManager.getInstance();
@@ -126,6 +128,24 @@ export class MachZehnderTableNode extends Node {
     mirrorLabel.right = MIRROR_UPPER.x - 26;
     mirrorLabel.centerY = MIRROR_UPPER.y;
 
+    // ── Path-difference contributions ────────────────────────────────────────
+    // Unlike the Michelson, nothing here is doubled: the two arms are separate
+    // routes crossed once each, so the imbalance and the slide contribute
+    // exactly what they are. Seeing the two screens' labels side by side is the
+    // clearest statement of why a Michelson's factor of two exists at all.
+    const imbalanceLabel = createTableLabel(pathDeltaProperty(model.pathImbalanceProperty, 0));
+    imbalanceLabel.centerX = MIRROR_UPPER.x + 44;
+    imbalanceLabel.bottom = MIRROR_UPPER.y - 12;
+    imbalanceLabel.visibleProperty = preferences.showOpticalPathProperty;
+
+    const samplePathLabel = createTableLabel(pathDeltaProperty(model.samplePathProperty, 0));
+    samplePathLabel.centerX = SAMPLE.x;
+    samplePathLabel.bottom = SAMPLE.y - 14;
+    samplePathLabel.visibleProperty = new DerivedProperty(
+      [preferences.showOpticalPathProperty, model.sampleEnabledProperty],
+      (show, enabled) => show && enabled,
+    );
+
     const sampleLabel = createTableLabel(machZehnder.sampleStringProperty);
     sampleLabel.centerX = SAMPLE.x;
     sampleLabel.top = SAMPLE.y + 16;
@@ -147,6 +167,8 @@ export class MachZehnderTableNode extends Node {
       portBLabel,
       mirrorLabel,
       sampleLabel,
+      imbalanceLabel,
+      samplePathLabel,
     ];
   }
 }

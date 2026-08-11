@@ -101,6 +101,52 @@ export function percentProperty(fractionProperty: TReadOnlyProperty<number>, dec
 }
 
 /**
+ * Formats a path difference as a number of wavelengths.
+ *
+ * A path difference in micrometres is a length; in wavelengths it is a fringe
+ * count, and that is the form in which it answers the question the screen is
+ * actually about. It is also the conversion students most often get wrong,
+ * because for a Michelson the mirror has only moved half as far.
+ *
+ * @param nanometersProperty - the path difference, nm
+ * @param wavelengthProperty - the wavelength to divide by, nm
+ * @param decimals - digits after the decimal point
+ */
+export function wavesProperty(
+  nanometersProperty: TReadOnlyProperty<number>,
+  wavelengthProperty: TReadOnlyProperty<number>,
+  decimals = 1,
+): TReadOnlyProperty<string> {
+  const units = StringManager.getInstance().getUnits();
+
+  return new DerivedProperty(
+    [nanometersProperty, wavelengthProperty, units.wavesStringProperty],
+    (nanometers, wavelengthNm, pattern) =>
+      StringUtils.fillIn(pattern, {
+        value: toFixed(wavelengthNm > 0 ? nanometers / wavelengthNm : 0, decimals),
+      }),
+  );
+}
+
+/**
+ * Formats an optical length as a labelled path-difference contribution, "Δ 29.3 µm".
+ *
+ * Used for the labels drawn on the optical table, where the element the number
+ * belongs to is right beside it and only the quantity needs naming.
+ */
+export function pathDeltaProperty(
+  nanometersProperty: TReadOnlyProperty<number>,
+  decimals = 1,
+): TReadOnlyProperty<string> {
+  const units = StringManager.getInstance().getUnits();
+  const length = lengthProperty(nanometersProperty, decimals);
+
+  return new DerivedProperty([length, units.pathDeltaStringProperty], (value, pattern) =>
+    StringUtils.fillIn(pattern, { value }),
+  );
+}
+
+/**
  * Formats an integer count with no unit.
  */
 export function countProperty(valueProperty: TReadOnlyProperty<number>): TReadOnlyProperty<string> {

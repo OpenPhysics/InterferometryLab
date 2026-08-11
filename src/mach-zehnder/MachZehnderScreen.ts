@@ -15,6 +15,7 @@ import { Screen } from "scenerystack/sim";
 import type { Tandem } from "scenerystack/tandem";
 import { createMachZehnderIcon } from "../common/InterferometryLabScreenIcons.js";
 import InterferometryLabColors from "../InterferometryLabColors.js";
+import type { InterferometryLabPreferencesModel } from "../preferences/InterferometryLabPreferencesModel.js";
 import { MachZehnderModel } from "./model/MachZehnderModel.js";
 import { MachZehnderKeyboardHelpContent } from "./view/MachZehnderKeyboardHelpContent.js";
 import { MachZehnderScreenView } from "./view/MachZehnderScreenView.js";
@@ -23,13 +24,18 @@ import { MachZehnderScreenView } from "./view/MachZehnderScreenView.js";
 type MachZehnderScreenOptions = ScreenOptions & { tandem: Tandem };
 
 export class MachZehnderScreen extends Screen<MachZehnderModel, MachZehnderScreenView> {
-  public constructor(options: MachZehnderScreenOptions) {
+  /**
+   * @param preferences - simulation preferences the view reads; the optical-path
+   *                      labels are a preference, so the view needs to see them
+   * @param options
+   */
+  public constructor(preferences: InterferometryLabPreferencesModel, options: MachZehnderScreenOptions) {
     super(
       // Model factory — called once when the screen is first shown
       () => new MachZehnderModel(),
       // View factory — receives the model instance
       (model) =>
-        new MachZehnderScreenView(model, {
+        new MachZehnderScreenView(model, preferences, {
           tandem: options.tandem.createTandem("view"),
         }),
       optionize<MachZehnderScreenOptions, EmptySelfOptions, ScreenOptions>()(

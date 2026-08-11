@@ -16,6 +16,23 @@ const securityHeaders: Record<string, string> = {
     "default-src 'self'",
     // 'unsafe-eval' is required for SceneryStack query parameter parsing
     "script-src 'self' 'unsafe-eval'",
+    // Event-handler attributes are governed separately from inline <script>
+    // elements, and only the two handlers SceneryStack itself writes are allowed
+    // here. ParallelDOM.pdomInputEnabledListener sets an inline `onclick` on any
+    // control whose input it disables — `return false` while disabled, and `""`
+    // when it is enabled again — to stop a disabled element toggling its own
+    // native state. The play/pause group's step button does this every time the
+    // clock starts or stops.
+    //
+    // 'unsafe-hashes' is what makes a hash apply to an event handler at all.
+    // Anything other than these two exact handlers still fails the policy, and
+    // inline <script> remains blocked by script-src above.
+    //
+    // Left unhandled this is not merely noise: the fuzz suite fails any run that
+    // logs a console error.
+    "script-src-attr 'unsafe-hashes' " +
+      "'sha256-GZIcz60Uwd6wT3vaYke/atSr53TehbYAPepOa3d03Vw=' " +
+      "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='",
     "worker-src blob: 'self'",
     // Inline styles are set via element.style / cssText throughout the UI layer
     "style-src 'self' 'unsafe-inline'",

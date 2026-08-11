@@ -6,20 +6,24 @@
  * WeakRef that the object was collected. V8 requires a function boundary (not merely
  * a block scope) so local strong references die when the helper returns.
  *
- * Beyond the template's TimeModel checks, this covers the two nodes in this sim
- * that hold listeners on model Properties: the fringe renderer and the photon
- * mark overlay. Both are created per screen rather than per frame, but both
- * subscribe to Properties they do not own, which is the shape of leak this suite
- * exists to catch.
+ * Beyond the template's TimeModel checks, this covers every node in this sim that
+ * holds listeners on model Properties: the fringe renderer, the photon mark
+ * overlay, and the two analysis charts. All are created per screen rather than
+ * per frame, but all subscribe to Properties they do not own, which is the shape
+ * of leak this suite exists to catch.
  */
 
 import { NumberProperty, Property } from "scenerystack/axon";
+import { Color } from "scenerystack/scenery";
 import { describe, expect, it } from "vitest";
 import type { FringeSpec } from "../src/common/model/FringeSpec.js";
 import { TimeModel } from "../src/common/TimeModel.js";
 import { FringePatternNode } from "../src/common/view/FringePatternNode.js";
+import { IntensityProfileNode } from "../src/common/view/IntensityProfileNode.js";
 import type { PhotonMark } from "../src/mach-zehnder/model/MachZehnderModel.js";
 import { PhotonMarksNode } from "../src/mach-zehnder/view/PhotonMarksNode.js";
+import { MichelsonModel } from "../src/michelson/model/MichelsonModel.js";
+import { CoherenceEnvelopeNode } from "../src/michelson/view/CoherenceEnvelopeNode.js";
 
 /**
  * Force garbage collection with multiple passes, stopping as soon as `collected`
@@ -72,6 +76,23 @@ function createAndDisposeFringePatternNode(specProperty: Property<FringeSpec>): 
 function createAndDisposePhotonMarksNode(revisionProperty: NumberProperty): WeakRef<object> {
   const marks: PhotonMark[] = [];
   const node = new PhotonMarksNode(marks, revisionProperty, 32);
+  const ref = new WeakRef<object>(node);
+  node.dispose();
+  return ref;
+}
+
+function createAndDisposeIntensityProfileNode(specProperty: Property<FringeSpec>): WeakRef<object> {
+  const node = new IntensityProfileNode([{ specProperty, colorProperty: new Property(new Color("#4fc3f7")) }], {
+    width: 64,
+    height: 32,
+  });
+  const ref = new WeakRef<object>(node);
+  node.dispose();
+  return ref;
+}
+
+function createAndDisposeCoherenceEnvelopeNode(model: MichelsonModel): WeakRef<object> {
+  const node = new CoherenceEnvelopeNode(model, { width: 64, height: 32 });
   const ref = new WeakRef<object>(node);
   node.dispose();
   return ref;
@@ -140,5 +161,39 @@ describe("Memory leak regression", () => {
     const ref = createAndDisposePhotonMarksNode(revisionProperty);
     await forceGC(() => ref.deref() === undefined);
     expect(ref.deref()).toBeUndefined();
+  });
+
+  it("IntensityProfileNode unlinks from the spec it does not own", () => {
+    const specProperty = new Property<FringeSpec>(makeSpec());
+    expect(specProperty.hasListeners()).toBe(false);
+    const node = new IntensityProfileNode([{ specProperty, colorProperty: new Property(new Color("#4fc3f7")) }], {
+      width: 64,
+      height: 32,
+    });
+    expect(specProperty.hasListeners()).toBe(true);
+    node.dispose();
+    expect(specProperty.hasListeners()).toBe(false);
+  });
+
+  it("IntensityProfileNode is collected after dispose", async () => {
+    const specProperty = new Property<FringeSpec>(makeSpec());
+    const ref = createAndDisposeIntensityProfileNode(specProperty);
+    await forceGC(() => ref.deref() === undefined);
+    expect(ref.deref()).toBeUndefined();
+  });
+
+  /**
+   * The model outlives the node here, which is what makes this a real check: a
+   * listener left behind on any of the model's Properties would keep the node
+   * reachable and the WeakRef alive. A `hasListeners` check cannot be used for
+   * this node — the model derives its own visibility and fringe count from the
+   * same Properties, so they have listeners before the node is even built.
+   */
+  it("CoherenceEnvelopeNode is collected after dispose, with its model still alive", async () => {
+    const model = new MichelsonModel();
+    const ref = createAndDisposeCoherenceEnvelopeNode(model);
+    await forceGC(() => ref.deref() === undefined);
+    expect(ref.deref()).toBeUndefined();
+    expect(model.pathDifferenceProperty.value).toBeDefined();
   });
 });

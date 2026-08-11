@@ -6,12 +6,13 @@
  */
 
 import { describe, expect, it } from "vitest";
-import type { FringeGeometry, MultiBeamTerms, TwoBeamTerms } from "../src/common/model/FringeSpec.js";
+import type { FringeGeometry, FringeSpec, MultiBeamTerms, TwoBeamTerms } from "../src/common/model/FringeSpec.js";
 import {
   airyIntensity,
   airyPeakTransmission,
   axialCosine,
   coefficientOfFinesse,
+  intensityProfile,
   opdSpread,
   opticalPathDifference,
   reflectiveFinesse,
@@ -194,5 +195,65 @@ describe("airyIntensity", () => {
     const flattened = airyIntensity(0, 600, cavity, 0);
     expect(flattened).toBeLessThan(peak);
     expect(flattened).toBeCloseTo(1 / Math.sqrt(1 + coefficientOfFinesse(0.9)), 10);
+  });
+});
+
+describe("intensityProfile", () => {
+  /** A single monochromatic line, as a laser produces. */
+  const laserGroup = { wavelengthNm: 600, bandwidthNm: 0, weight: 1, opdOffsetNm: 0 };
+
+  /** The trace across a pattern with a horizontal wedge and nothing else. */
+  const wedgeSpec = (tiltXNm: number, extraPhaseRad = 0): FringeSpec => ({
+    geometry: { ...flatGeometry, apertureTanTheta: 0, tiltXNm },
+    groups: [laserGroup],
+    terms: { ...equalRoutes, extraPhaseRad },
+    contrast: 1,
+    exposure: 0.5,
+  });
+
+  it("is flat when the path difference does not vary across the detector", () => {
+    const values = intensityProfile(wedgeSpec(0), 64);
+    expect(values).toHaveLength(64);
+    for (const value of values) {
+      expect(value).toBeCloseTo(values[0] ?? 0, 12);
+    }
+  });
+
+  it("draws one bright fringe per wavelength of wedge across the field", () => {
+    // tiltX is the extra path difference at the u = +1 edge, so the path
+    // difference sweeps 2·tiltX from edge to edge: four wavelengths here, and so
+    // four bright fringes.
+    const values = intensityProfile(wedgeSpec(2 * 600), 4000);
+
+    let peaks = 0;
+    let above = false;
+    const midpoint = 0.5;
+    for (const value of values) {
+      if (value > midpoint && !above) {
+        above = true;
+      } else if (value <= midpoint && above) {
+        above = false;
+        peaks++;
+      }
+    }
+    expect(peaks).toBe(4);
+  });
+
+  it("keeps the two Mach-Zehnder ports' traces summing to a constant", () => {
+    // The claim the Mach-Zehnder screen exists to make: the second splitter's
+    // outputs are a half-wave apart, so whatever leaves one port is missing from
+    // the other and the total is the same everywhere. Interference redistributes
+    // light; it never destroys it.
+    const portA = intensityProfile(wedgeSpec(1500, 0), 200);
+    const portB = intensityProfile(wedgeSpec(1500, Math.PI), 200);
+
+    portA.forEach((value, index) => {
+      expect(value + (portB[index] ?? 0)).toBeCloseTo(1, 12);
+    });
+  });
+
+  it("fills a caller-supplied buffer instead of allocating", () => {
+    const buffer = new Float64Array(32);
+    expect(intensityProfile(wedgeSpec(900), 32, buffer)).toBe(buffer);
   });
 });
