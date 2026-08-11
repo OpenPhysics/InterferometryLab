@@ -94,6 +94,104 @@ const InterferometryLabColors = {
     default: "#1a1a1a",
     projector: "#1a1a1a",
   }),
+
+  // ── Optical table ────────────────────────────────────────────────────────────
+  // The table is drawn top-down. It stays darker than the surrounding screen in
+  // both profiles so that beams — which are drawn in their own wavelength's
+  // colour and must read as *emitted* light — always sit on a darker ground.
+
+  /** Surface of the optical breadboard the components sit on. */
+  tableColorProperty: new ProfileColorProperty(InterferometryLabNamespace, "table", {
+    default: "#10101c",
+    projector: "#e8e8ee",
+  }),
+
+  /** Mounting-hole grid ruled across the breadboard. */
+  tableGridColorProperty: new ProfileColorProperty(InterferometryLabNamespace, "tableGrid", {
+    default: "#26263c",
+    projector: "#cfcfdb",
+  }),
+
+  /** Outline around the breadboard and around the detector bezel. */
+  tableBorderColorProperty: new ProfileColorProperty(InterferometryLabNamespace, "tableBorder", {
+    default: "#3a3a5c",
+    projector: "#9a9aae",
+  }),
+
+  // ── Optical components ───────────────────────────────────────────────────────
+
+  /** Reflective face of a mirror. */
+  mirrorColorProperty: new ProfileColorProperty(InterferometryLabNamespace, "mirror", {
+    default: "#c8d4e0",
+    projector: "#7e8a99",
+  }),
+
+  /** Substrate behind a mirror's coating, and the body of a mount. */
+  mountColorProperty: new ProfileColorProperty(InterferometryLabNamespace, "mount", {
+    default: "#4a4a63",
+    projector: "#8a8a9c",
+  }),
+
+  /** Glass of a beam splitter, compensator, sample slide, or cell window. */
+  glassColorProperty: new ProfileColorProperty(InterferometryLabNamespace, "glass", {
+    default: "rgba(150,200,225,0.34)",
+    projector: "rgba(70,120,170,0.30)",
+  }),
+
+  /** Outline of a glass component. */
+  glassStrokeColorProperty: new ProfileColorProperty(InterferometryLabNamespace, "glassStroke", {
+    default: "#8fc4de",
+    projector: "#4a7fa5",
+  }),
+
+  /** Body of the laser or lamp housing. */
+  sourceBodyColorProperty: new ProfileColorProperty(InterferometryLabNamespace, "sourceBody", {
+    default: "#5a5a72",
+    projector: "#6f6f86",
+  }),
+
+  /** Face of a detector, before any light falls on it. */
+  detectorFaceColorProperty: new ProfileColorProperty(InterferometryLabNamespace, "detectorFace", {
+    default: "#050508",
+    projector: "#141420",
+  }),
+
+  /** Gas filling the evacuable cell, shown at full pressure. */
+  gasFillColorProperty: new ProfileColorProperty(InterferometryLabNamespace, "gasFill", {
+    default: "#7fd4ff",
+    projector: "#2f8fbf",
+  }),
+
+  // ── Labels and readouts ──────────────────────────────────────────────────────
+
+  /** Component labels drawn directly on the optical table. */
+  tableLabelColorProperty: new ProfileColorProperty(InterferometryLabNamespace, "tableLabel", {
+    default: "#a8b2c8",
+    projector: "#48506a",
+  }),
+
+  /** Numeric values in readout rows — brighter than their labels. */
+  valueColorProperty: new ProfileColorProperty(InterferometryLabNamespace, "value", {
+    default: "#ffd479",
+    projector: "#8a5a00",
+  }),
+
+  /** Plot traces, axes and gridlines on the transmission-spectrum chart. */
+  plotTraceColorProperty: new ProfileColorProperty(InterferometryLabNamespace, "plotTrace", {
+    default: "#4fc3f7",
+    projector: "#1565a8",
+  }),
+
+  plotAxisColorProperty: new ProfileColorProperty(InterferometryLabNamespace, "plotAxis", {
+    default: "#7a86a0",
+    projector: "#5a6070",
+  }),
+
+  /** Marks left by individual detected photons as the pattern builds up. */
+  photonMarkColorProperty: new ProfileColorProperty(InterferometryLabNamespace, "photonMark", {
+    default: "#fff4c2",
+    projector: "#fff4c2",
+  }),
 };
 
 export default InterferometryLabColors;

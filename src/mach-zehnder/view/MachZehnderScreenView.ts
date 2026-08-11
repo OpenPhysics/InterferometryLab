@@ -1,87 +1,149 @@
 /**
  * MachZehnderScreenView.ts
  *
- * The top-level view for the simulation screen.
+ * The table on the left, both output ports side by side on the right, controls
+ * along the bottom.
  *
- * All visual nodes are added here. Follow these conventions:
- *   - Use this.layoutBounds for positioning (never magic pixel values)
- *   - Keep a ResetAllButton that calls model.reset() and this.reset()
- *   - Override step(dt) for frame-by-frame animation
- *
- * ── Adding content ────────────────────────────────────────────────────────────
- * 1. Create Node subclasses in separate files (e.g. InterferometryLabControlPanel.ts)
- * 2. Instantiate them here and call this.addChild(...)
- * 3. Link them to model properties:
- *      model.isRunningProperty.link( isRunning => { ... } );
- *
- * ── Layout bounds ─────────────────────────────────────────────────────────────
- * SceneryStack uses a virtual 1024×618 coordinate space by default.
- * this.layoutBounds gives you the full rectangle; use it for alignment:
- *   center, minX, maxX, minY, maxY, width, height
+ * Showing the two detectors together, always, is the layout's one real
+ * commitment. Every claim this screen makes — that interference redistributes
+ * light rather than destroying it, that single photons build the same pattern,
+ * that knowing the path erases it — is a claim about the *pair* of ports, and it
+ * is unreadable from either one alone.
  */
 
+import { DerivedProperty } from "scenerystack/axon";
 import { type EmptySelfOptions, optionize } from "scenerystack/phet-core";
-import { Node, Rectangle, Text } from "scenerystack/scenery";
+import { HBox, Node, VBox } from "scenerystack/scenery";
 import { ResetAllButton } from "scenerystack/scenery-phet";
 import { ScreenView, type ScreenViewOptions } from "scenerystack/sim";
 import { FLAT_RESET_ALL_BUTTON_OPTIONS } from "../../common/InterferometryLabButtonOptions.js";
-import InterferometryLabColors from "../../InterferometryLabColors.js";
-import { SCREEN_VIEW_MARGIN } from "../../InterferometryLabConstants.js";
+import { DetectorScreenNode } from "../../common/view/DetectorScreenNode.js";
+import { lengthProperty, percentProperty } from "../../common/view/formatters.js";
+import { LightSourcePanel } from "../../common/view/LightSourcePanel.js";
+import { ReadoutBlock } from "../../common/view/ReadoutBlock.js";
+import { CONTROL_PANEL_WIDTH, PANEL_SPACING, SCREEN_VIEW_MARGIN } from "../../InterferometryLabConstants.js";
+import { StringManager } from "../../i18n/StringManager.js";
+import { BeamMode } from "../model/BeamMode.js";
 import type { MachZehnderModel } from "../model/MachZehnderModel.js";
+import { MachZehnderArmsPanel } from "./MachZehnderArmsPanel.js";
+import { MachZehnderModePanel } from "./MachZehnderModePanel.js";
+import { MachZehnderSamplePanel } from "./MachZehnderSamplePanel.js";
 import { MachZehnderScreenSummaryContent } from "./MachZehnderScreenSummaryContent.js";
+import { MachZehnderTableNode } from "./MachZehnderTableNode.js";
+import { PhotonMarksNode } from "./PhotonMarksNode.js";
 
 export type MachZehnderScreenViewOptions = ScreenViewOptions;
 
+/** Width of each panel's content in the bottom row, view pixels. */
+const PANEL_CONTENT_WIDTH = CONTROL_PANEL_WIDTH - 24;
+
+/** Side length of each of the two port detectors, view pixels. Smaller than the
+ *  single detector on the other screens, because there are two of them. */
+const PORT_DETECTOR_SIZE = 168;
+
 export class MachZehnderScreenView extends ScreenView {
   public constructor(model: MachZehnderModel, providedOptions?: MachZehnderScreenViewOptions) {
-    // ── Accessibility: screen summary ───────────────────────────────────────────
-    // The screen summary is the first thing a screen-reader user encounters. It
-    // is registered here, in the ScreenView's super() options, so every sim wires
-    // it the same way. See MachZehnderScreenSummaryContent for the four content regions.
     const options = optionize<MachZehnderScreenViewOptions, EmptySelfOptions, ScreenViewOptions>()(
-      {
-        screenSummaryContent: new MachZehnderScreenSummaryContent(model),
-      },
+      { screenSummaryContent: new MachZehnderScreenSummaryContent(model) },
       providedOptions,
     );
     super(options);
 
-    // ── Background ────────────────────────────────────────────────────────────
-    // A full-screen rectangle that follows the active color profile.
-    // Replace or remove once you add real content.
-    const backgroundRect = new Rectangle(0, 0, this.layoutBounds.width, this.layoutBounds.height, {
-      fill: InterferometryLabColors.backgroundColorProperty,
+    const strings = StringManager.getInstance();
+    const common = strings.getCommon();
+    const machZehnder = strings.getMachZehnderStrings();
+    const a11y = strings.getMachZehnderA11yStrings().controls;
+
+    const popupLayer = new Node();
+
+    const isContinuousProperty = new DerivedProperty([model.beamModeProperty], (mode) => mode === BeamMode.CONTINUOUS);
+    const isSinglePhotonProperty = new DerivedProperty(
+      [model.beamModeProperty],
+      (mode) => mode === BeamMode.SINGLE_PHOTON,
+    );
+
+    const tableNode = new MachZehnderTableNode(model);
+
+    /**
+     * One port: the pattern, the accumulated photon marks over it, and the share
+     * of the light it is receiving. In single-photon mode the continuous pattern
+     * is hidden so that only the marks are visible — the whole point being that
+     * the pattern is not there until the photons have drawn it.
+     */
+    const createPort = (
+      specProperty: typeof model.portASpecProperty,
+      marks: typeof model.marksA,
+      title: typeof machZehnder.portAStringProperty,
+      fractionProperty: typeof model.portAFractionProperty,
+    ): VBox => {
+      const detector = new DetectorScreenNode(specProperty, { size: PORT_DETECTOR_SIZE, title });
+      detector.patternNode.visibleProperty = isContinuousProperty;
+
+      const marksNode = new PhotonMarksNode(marks, model.photonRevisionProperty, PORT_DETECTOR_SIZE, {
+        visibleProperty: isSinglePhotonProperty,
+      });
+      detector.overlayLayer.addChild(marksNode);
+
+      const readout = new ReadoutBlock([
+        { label: common.intensityStringProperty, value: percentProperty(fractionProperty, 0) },
+      ]);
+
+      return new VBox({ spacing: 6, align: "center", children: [detector, readout] });
+    };
+
+    const portA = createPort(
+      model.portASpecProperty,
+      model.marksA,
+      machZehnder.portAStringProperty,
+      model.portAFractionProperty,
+    );
+    const portB = createPort(
+      model.portBSpecProperty,
+      model.marksB,
+      machZehnder.portBStringProperty,
+      model.portBFractionProperty,
+    );
+
+    const pathReadout = new ReadoutBlock([
+      { label: common.pathDifferenceStringProperty, value: lengthProperty(model.pathDifferenceProperty, 0) },
+    ]);
+
+    const detectorColumn = new VBox({
+      spacing: 8,
+      align: "center",
+      children: [new HBox({ spacing: PANEL_SPACING, align: "top", children: [portA, portB] }), pathReadout],
     });
-    this.addChild(backgroundRect);
 
-    // ── Placeholder label ─────────────────────────────────────────────────────
-    // Replace this with your actual simulation content.
-    const placeholderText = new Text("Mach-Zehnder", {
-      font: "bold 36px sans-serif",
-      fill: InterferometryLabColors.textColorProperty,
-      center: this.layoutBounds.center,
+    const topRow = new HBox({
+      spacing: PANEL_SPACING + 8,
+      align: "top",
+      children: [tableNode, detectorColumn],
     });
-    this.addChild(placeholderText);
+    topRow.left = this.layoutBounds.minX + SCREEN_VIEW_MARGIN;
+    topRow.top = this.layoutBounds.minY + SCREEN_VIEW_MARGIN;
 
-    // ── Accessibility: per-control names ────────────────────────────────────────
-    // EVERY interactive node must carry an `accessibleName` (and an
-    // `accessibleHelpText` where useful), sourced from the StringManager `a11y`
-    // string group — never a hard-coded English literal. Sun/scenery-phet controls
-    // (NumberControl, Checkbox, ComboBox, AquaRadioButtonGroup, …) accept it as an
-    // option; a draggable plain Node needs `tagName: "div", focusable: true` too.
-    // Example (uncomment and adapt when you add a real control):
-    //
-    //   const a11y = StringManager.getInstance().getMachZehnderA11yStrings();
-    //   const exampleButton = new RectangularPushButton({
-    //     ...FLAT_RECTANGULAR_BUTTON_OPTIONS, // flat appearance, not SceneryStack's default 3-D look
-    //     content: someIcon,
-    //     listener: () => model.doSomething(),
-    //     accessibleName: a11y.controls.exampleControlStringProperty,
-    //   });
-    //   this.addChild(exampleButton);
+    const sourcePanel = new LightSourcePanel(model.lightSource, {
+      listParent: popupLayer,
+      accessibleNames: {
+        sourcePicker: a11y.sourcePickerStringProperty,
+        wavelength: a11y.wavelengthStringProperty,
+        bandwidth: a11y.bandwidthStringProperty,
+      },
+      contentWidth: PANEL_CONTENT_WIDTH,
+    });
 
-    // ── Reset All button ──────────────────────────────────────────────────────
-    // Always position at bottom-right (PhET convention).
+    const armsPanel = new MachZehnderArmsPanel(model, PANEL_CONTENT_WIDTH);
+    const samplePanel = new MachZehnderSamplePanel(model, PANEL_CONTENT_WIDTH);
+    const modePanel = new MachZehnderModePanel(model, PANEL_CONTENT_WIDTH);
+
+    const controlRow = new HBox({
+      spacing: PANEL_SPACING,
+      align: "top",
+      children: [sourcePanel, armsPanel, samplePanel, modePanel],
+    });
+    controlRow.left = this.layoutBounds.minX + SCREEN_VIEW_MARGIN;
+    controlRow.top = topRow.bottom + PANEL_SPACING;
+
     const resetAllButton = new ResetAllButton({
       ...FLAT_RESET_ALL_BUTTON_OPTIONS,
       listener: () => {
@@ -91,37 +153,21 @@ export class MachZehnderScreenView extends ScreenView {
       right: this.layoutBounds.maxX - SCREEN_VIEW_MARGIN,
       bottom: this.layoutBounds.maxY - SCREEN_VIEW_MARGIN,
     });
-    this.addChild(resetAllButton);
 
-    // ── Accessibility: keyboard / reading traversal order ───────────────────────
-    // Make the parallel DOM (Tab order and screen-reader reading order)
-    // deterministic and independent of child z-order. ScreenView throws if you
-    // set pdomOrder on itself, so add a lightweight wrapper Node that "borrows"
-    // the interactive nodes in the order a user should reach them — Reset All
-    // last. Non-interactive decoration (background, placeholder) is omitted.
+    this.children = [topRow, controlRow, resetAllButton, popupLayer];
+
     this.addChild(
       new Node({
-        pdomOrder: [
-          // TODO: add the sim's interactive nodes here, in traversal order
-          resetAllButton,
-        ],
+        pdomOrder: [sourcePanel, armsPanel, samplePanel, modePanel, resetAllButton],
       }),
     );
   }
 
-  /**
-   * Resets view-side state (animations, panel visibility, etc.).
-   * Called by the Reset All button listener.
-   */
   public reset(): void {
-    // TODO: reset any view-side state here
+    // All state lives in the model.
   }
 
-  /**
-   * Steps the view forward by dt seconds for animation.
-   * @param _dt - elapsed time in seconds
-   */
   public override step(_dt: number): void {
-    // TODO: implement animation updates here
+    // Photon emission is stepped by the model; the view only repaints on change.
   }
 }

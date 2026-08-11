@@ -3,45 +3,181 @@
   "screens": {
     "michelson": "Michelson",
     "machZehnder": "Mach-Zehnder",
-    "fabryPerot": "Fabry-Perot"
+    "fabryPerot": "Fabry-Pérot"
+  },
+  "common": {
+    "lightSource": "Light Source",
+    "source": "Source",
+    "heliumNeon": "Helium-neon laser",
+    "greenLaser": "Green laser",
+    "blueLaser": "Blue laser",
+    "sodiumLamp": "Sodium lamp",
+    "filteredLamp": "Filtered lamp",
+    "whiteLight": "White light",
+    "wavelength": "Wavelength",
+    "bandwidth": "Bandwidth",
+    "coherenceLength": "Coherence length",
+    "pathDifference": "Path difference",
+    "visibility": "Fringe visibility",
+    "intensity": "Intensity",
+    "detector": "Detector",
+    "readings": "Readings",
+    "laser": "Laser",
+    "beamSplitter": "Beam splitter",
+    "mirror": "Mirror",
+    "movableMirror": "Movable mirror",
+    "fixedMirror": "Fixed mirror",
+    "screen": "Screen",
+    "unlimited": "unlimited"
+  },
+  "units": {
+    "nanometers": "{{value}} nm",
+    "micrometers": "{{value}} µm",
+    "millimeters": "{{value}} mm",
+    "picometers": "{{value}} pm",
+    "kilopascals": "{{value}} kPa",
+    "microradians": "{{value}} µrad",
+    "degrees": "{{value}}°",
+    "percent": "{{value}}%",
+    "perSecond": "{{value}}/s",
+    "plain": "{{value}}",
+    "waves": "{{value}} λ"
+  },
+  "michelson": {
+    "arm": "Movable Mirror",
+    "coarse": "Coarse travel",
+    "micrometer": "Micrometer",
+    "zeroTheArms": "Zero the arms",
+    "fringesCounted": "Fringes counted",
+    "resetCount": "Reset count",
+    "alignment": "Alignment",
+    "tiltHorizontal": "Tilt M₂ about the vertical axis",
+    "tiltVertical": "Tilt M₂ about the horizontal axis",
+    "compensatorPlate": "Compensator plate",
+    "gasCell": "Gas Cell",
+    "insertCell": "Insert the gas cell",
+    "pressure": "Pressure",
+    "indexOfRefraction": "Index of refraction",
+    "fringesShifted": "Fringes shifted"
+  },
+  "machZehnder": {
+    "pathImbalance": "Path imbalance",
+    "arms": "Arms",
+    "tilt": "Tilt M₂",
+    "sample": "Sample",
+    "insertSample": "Insert the sample slide",
+    "thickness": "Thickness",
+    "index": "Index of refraction",
+    "slideTilt": "Slide tilt",
+    "addedPath": "Added path length",
+    "mode": "Mode",
+    "classical": "Continuous beam",
+    "singlePhoton": "One photon at a time",
+    "photonRate": "Emission rate",
+    "whichPath": "Mark which path the photon takes",
+    "clearCounts": "Clear counts",
+    "portA": "Port A",
+    "portB": "Port B",
+    "counts": "Counts",
+    "photonsEmitted": "Photons emitted"
+  },
+  "fabryPerot": {
+    "cavity": "Cavity",
+    "reflectance": "Mirror reflectance",
+    "absorptance": "Mirror absorption",
+    "spacing": "Mirror spacing",
+    "scanCavity": "Scan the spacing",
+    "finesse": "Finesse",
+    "freeSpectralRange": "Free spectral range",
+    "resolvingPower": "Resolving power",
+    "peakTransmission": "Peak transmission",
+    "order": "Order at centre",
+    "sourceLines": "Source",
+    "twinLine": "Add a second line",
+    "lineSeparation": "Line separation",
+    "transmission": "Transmission",
+    "spectrum": "Transmission spectrum",
+    "resolved": "The two lines are resolved",
+    "unresolved": "The two lines are not resolved"
   },
   "a11y": {
     "michelson": {
       "screenSummary": {
-        "playArea": "The play area shows the main simulation content.",
-        "controlArea": "The control area has a Reset All button that returns the simulation to its starting state.",
-        "interactionHint": "Explore the simulation by interacting with its controls."
+        "playArea": "A Michelson interferometer on an optical table. Light from the source is split in two by a beam splitter, sent to a movable mirror and a fixed mirror, and recombined onto a detector screen where it forms fringes.",
+        "controlArea": "The control area has the light source picker, the movable mirror's coarse and micrometer controls, mirror alignment, a gas cell, and a Reset All button that returns the simulation to its starting state.",
+        "interactionHint": "Change the movable mirror position to sweep the fringes, or switch the source to see how coherence length limits the path difference."
       },
-      "currentDetails": "The simulation is in its initial state.",
+      "currentDetails": "The source is {{source}} at {{wavelength}}. The optical path difference is {{pathDifference}} and the fringe visibility is {{visibility}}. The pattern shows {{pattern}}.",
+      "patternRings": "circular fringes",
+      "patternStraight": "straight fringes",
+      "patternUniform": "a single fringe filling the whole field",
+      "patternWashedOut": "no fringes, only uniform light",
       "controls": {
-        "exampleControl": "Example control"
+        "sourcePicker": "Light source",
+        "wavelength": "Source wavelength",
+        "bandwidth": "Source bandwidth",
+        "coarse": "Movable mirror coarse travel",
+        "micrometer": "Movable mirror micrometer",
+        "zeroTheArms": "Zero the arms",
+        "resetCount": "Reset the fringe count",
+        "tiltHorizontal": "Fixed mirror tilt about the vertical axis",
+        "tiltVertical": "Fixed mirror tilt about the horizontal axis",
+        "compensatorPlate": "Compensator plate in the beam",
+        "insertCell": "Gas cell in the beam",
+        "pressure": "Gas cell pressure"
       }
     },
     "machZehnder": {
       "screenSummary": {
-        "playArea": "The play area shows the main simulation content.",
-        "controlArea": "The control area has a Reset All button that returns the simulation to its starting state.",
-        "interactionHint": "Explore the simulation by interacting with its controls."
+        "playArea": "A Mach-Zehnder interferometer. A beam splitter sends light along two separate paths, two mirrors fold them back together, and a second beam splitter recombines them into two output ports, each with its own detector.",
+        "controlArea": "The control area has the light source picker, the path imbalance and mirror tilt controls, an insertable sample slide, a choice between a continuous beam and single photons, and a Reset All button that returns the simulation to its starting state.",
+        "interactionHint": "Change the path imbalance and watch the light move from one port to the other, or tilt a mirror to spread the pattern into fringes."
       },
-      "currentDetails": "The simulation is in its initial state.",
+      "currentDetails": "The optical path difference is {{pathDifference}}. Port A receives {{portA}} of the light and port B receives {{portB}}. {{modeDetail}}",
+      "classicalDetail": "The beam is continuous.",
+      "photonDetail": "{{emitted}} photons have been emitted; {{countsA}} landed at port A and {{countsB}} at port B.",
+      "whichPathDetail": "The which-path marker is on, so the two paths no longer interfere.",
       "controls": {
-        "exampleControl": "Example control"
+        "sourcePicker": "Light source",
+        "wavelength": "Source wavelength",
+        "bandwidth": "Source bandwidth",
+        "pathImbalance": "Path imbalance",
+        "tiltHorizontal": "Mirror tilt about the vertical axis",
+        "tiltVertical": "Mirror tilt about the horizontal axis",
+        "insertSample": "Sample slide in the beam",
+        "thickness": "Sample thickness",
+        "index": "Sample index of refraction",
+        "slideTilt": "Sample slide tilt",
+        "mode": "Beam mode",
+        "photonRate": "Photon emission rate",
+        "whichPath": "Which-path marker",
+        "clearCounts": "Clear the photon counts"
       }
     },
     "fabryPerot": {
       "screenSummary": {
-        "playArea": "The play area shows the main simulation content.",
-        "controlArea": "The control area has a Reset All button that returns the simulation to its starting state.",
-        "interactionHint": "Explore the simulation by interacting with its controls."
+        "playArea": "A Fabry-Pérot interferometer. Light enters a cavity between two partly reflecting mirrors and bounces back and forth many times before leaving, so many beams interfere at once and the transmitted rings are far sharper than two-beam fringes.",
+        "controlArea": "The control area has the source wavelength and an optional second line, the cavity's mirror reflectance, absorption and spacing, and a Reset All button that returns the simulation to its starting state.",
+        "interactionHint": "Raise the mirror reflectance and watch the broad rings narrow into sharp peaks."
       },
-      "currentDetails": "The simulation is in its initial state.",
+      "currentDetails": "The mirror reflectance is {{reflectance}}, giving a finesse of {{finesse}}. The cavity spacing is {{spacing}} and the free spectral range is {{freeSpectralRange}}. {{resolutionDetail}}",
+      "resolvedDetail": "The two source lines are resolved.",
+      "unresolvedDetail": "The two source lines are not resolved.",
+      "singleLineDetail": "The source has a single line.",
       "controls": {
-        "exampleControl": "Example control"
+        "wavelength": "Source wavelength",
+        "twinLine": "Second source line",
+        "lineSeparation": "Separation between the two source lines",
+        "reflectance": "Mirror reflectance",
+        "absorptance": "Mirror absorption",
+        "spacing": "Mirror spacing",
+        "scanCavity": "Scan the mirror spacing"
       }
     }
   },
   "preferences": {
     "title": "Simulation",
-    "exampleToggle": "Example Toggle"
+    "showOpticalPath": "Show optical path lengths",
+    "showOpticalPathDescription": "Label each beam segment on the table with the optical path length it accumulates."
   }
 }

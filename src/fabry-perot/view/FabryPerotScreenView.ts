@@ -1,87 +1,111 @@
 /**
  * FabryPerotScreenView.ts
  *
- * The top-level view for the simulation screen.
+ * The cavity on the left, the rings it produces in the middle, and the
+ * transmission spectrum on the right.
  *
- * All visual nodes are added here. Follow these conventions:
- *   - Use this.layoutBounds for positioning (never magic pixel values)
- *   - Keep a ResetAllButton that calls model.reset() and this.reset()
- *   - Override step(dt) for frame-by-frame animation
- *
- * ── Adding content ────────────────────────────────────────────────────────────
- * 1. Create Node subclasses in separate files (e.g. InterferometryLabControlPanel.ts)
- * 2. Instantiate them here and call this.addChild(...)
- * 3. Link them to model properties:
- *      model.isRunningProperty.link( isRunning => { ... } );
- *
- * ── Layout bounds ─────────────────────────────────────────────────────────────
- * SceneryStack uses a virtual 1024×618 coordinate space by default.
- * this.layoutBounds gives you the full rectangle; use it for alignment:
- *   center, minX, maxX, minY, maxY, width, height
+ * The two right-hand panes are the same physics seen along two different axes —
+ * rings vary with angle at fixed wavelength, the plot varies with wavelength at
+ * fixed angle — and putting them side by side is what lets a sharp peak in one
+ * be recognised as a sharp ring in the other.
  */
 
 import { type EmptySelfOptions, optionize } from "scenerystack/phet-core";
-import { Node, Rectangle, Text } from "scenerystack/scenery";
+import { HBox, Node } from "scenerystack/scenery";
 import { ResetAllButton } from "scenerystack/scenery-phet";
 import { ScreenView, type ScreenViewOptions } from "scenerystack/sim";
 import { FLAT_RESET_ALL_BUTTON_OPTIONS } from "../../common/InterferometryLabButtonOptions.js";
-import InterferometryLabColors from "../../InterferometryLabColors.js";
-import { SCREEN_VIEW_MARGIN } from "../../InterferometryLabConstants.js";
+import { DetectorScreenNode } from "../../common/view/DetectorScreenNode.js";
+import { lengthProperty, percentProperty, plainProperty, unitProperty } from "../../common/view/formatters.js";
+import { ReadoutBlock } from "../../common/view/ReadoutBlock.js";
+import { TitledPanel } from "../../common/view/TitledPanel.js";
+import { CONTROL_PANEL_WIDTH, PANEL_SPACING, SCREEN_VIEW_MARGIN } from "../../InterferometryLabConstants.js";
+import { StringManager } from "../../i18n/StringManager.js";
 import type { FabryPerotModel } from "../model/FabryPerotModel.js";
+import { FabryPerotCavityPanel } from "./FabryPerotCavityPanel.js";
 import { FabryPerotScreenSummaryContent } from "./FabryPerotScreenSummaryContent.js";
+import { FabryPerotSourcePanel } from "./FabryPerotSourcePanel.js";
+import { FabryPerotTableNode } from "./FabryPerotTableNode.js";
+import { TransmissionSpectrumNode } from "./TransmissionSpectrumNode.js";
 
 export type FabryPerotScreenViewOptions = ScreenViewOptions;
 
+/** Width of each panel's content in the bottom row, view pixels. */
+const PANEL_CONTENT_WIDTH = CONTROL_PANEL_WIDTH - 24;
+
+/** Side length of the ring pattern, view pixels. */
+const RING_SIZE = 216;
+
+/** Size of the transmission plot, view pixels. */
+const PLOT_WIDTH = 370;
+const PLOT_HEIGHT = 196;
+
 export class FabryPerotScreenView extends ScreenView {
   public constructor(model: FabryPerotModel, providedOptions?: FabryPerotScreenViewOptions) {
-    // ── Accessibility: screen summary ───────────────────────────────────────────
-    // The screen summary is the first thing a screen-reader user encounters. It
-    // is registered here, in the ScreenView's super() options, so every sim wires
-    // it the same way. See FabryPerotScreenSummaryContent for the four content regions.
     const options = optionize<FabryPerotScreenViewOptions, EmptySelfOptions, ScreenViewOptions>()(
-      {
-        screenSummaryContent: new FabryPerotScreenSummaryContent(model),
-      },
+      { screenSummaryContent: new FabryPerotScreenSummaryContent(model) },
       providedOptions,
     );
     super(options);
 
-    // ── Background ────────────────────────────────────────────────────────────
-    // A full-screen rectangle that follows the active color profile.
-    // Replace or remove once you add real content.
-    const backgroundRect = new Rectangle(0, 0, this.layoutBounds.width, this.layoutBounds.height, {
-      fill: InterferometryLabColors.backgroundColorProperty,
+    const strings = StringManager.getInstance();
+    const common = strings.getCommon();
+    const fabryPerot = strings.getFabryPerotStrings();
+    const units = strings.getUnits();
+
+    const tableNode = new FabryPerotTableNode(model);
+
+    const detectorNode = new DetectorScreenNode(model.fringeSpecProperty, {
+      size: RING_SIZE,
+      title: common.detectorStringProperty,
     });
-    this.addChild(backgroundRect);
 
-    // ── Placeholder label ─────────────────────────────────────────────────────
-    // Replace this with your actual simulation content.
-    const placeholderText = new Text("Fabry-Perot", {
-      font: "bold 36px sans-serif",
-      fill: InterferometryLabColors.textColorProperty,
-      center: this.layoutBounds.center,
+    const spectrumNode = new TransmissionSpectrumNode(model, { width: PLOT_WIDTH, height: PLOT_HEIGHT });
+
+    const topRow = new HBox({
+      spacing: PANEL_SPACING + 4,
+      align: "top",
+      children: [tableNode, detectorNode, spectrumNode],
     });
-    this.addChild(placeholderText);
+    topRow.left = this.layoutBounds.minX + SCREEN_VIEW_MARGIN;
+    topRow.top = this.layoutBounds.minY + SCREEN_VIEW_MARGIN;
 
-    // ── Accessibility: per-control names ────────────────────────────────────────
-    // EVERY interactive node must carry an `accessibleName` (and an
-    // `accessibleHelpText` where useful), sourced from the StringManager `a11y`
-    // string group — never a hard-coded English literal. Sun/scenery-phet controls
-    // (NumberControl, Checkbox, ComboBox, AquaRadioButtonGroup, …) accept it as an
-    // option; a draggable plain Node needs `tagName: "div", focusable: true` too.
-    // Example (uncomment and adapt when you add a real control):
-    //
-    //   const a11y = StringManager.getInstance().getFabryPerotA11yStrings();
-    //   const exampleButton = new RectangularPushButton({
-    //     ...FLAT_RECTANGULAR_BUTTON_OPTIONS, // flat appearance, not SceneryStack's default 3-D look
-    //     content: someIcon,
-    //     listener: () => model.doSomething(),
-    //     accessibleName: a11y.controls.exampleControlStringProperty,
-    //   });
-    //   this.addChild(exampleButton);
+    const sourcePanel = new FabryPerotSourcePanel(model, PANEL_CONTENT_WIDTH);
+    const cavityPanel = new FabryPerotCavityPanel(model, PANEL_CONTENT_WIDTH);
 
-    // ── Reset All button ──────────────────────────────────────────────────────
-    // Always position at bottom-right (PhET convention).
+    // The derived numbers, in the order they build on one another: finesse from
+    // the mirrors alone, free spectral range from the spacing alone, then the
+    // order and the resolving power that combine them.
+    const readouts = new ReadoutBlock([
+      { label: fabryPerot.finesseStringProperty, value: plainProperty(model.finesseProperty, 1) },
+      {
+        label: fabryPerot.freeSpectralRangeStringProperty,
+        value: lengthProperty(model.freeSpectralRangeProperty, 3),
+      },
+      { label: fabryPerot.orderStringProperty, value: plainProperty(model.orderProperty, 0) },
+      { label: fabryPerot.resolvingPowerStringProperty, value: plainProperty(model.resolvingPowerProperty, 0) },
+      {
+        label: fabryPerot.lineSeparationStringProperty,
+        value: unitProperty(model.resolutionLimitProperty, units.picometersStringProperty, 1),
+      },
+      {
+        label: fabryPerot.peakTransmissionStringProperty,
+        value: percentProperty(model.peakTransmissionProperty, 0),
+      },
+    ]);
+
+    const readoutPanel = new TitledPanel(common.readingsStringProperty, [readouts], {
+      contentWidth: PANEL_CONTENT_WIDTH + 60,
+    });
+
+    const controlRow = new HBox({
+      spacing: PANEL_SPACING,
+      align: "top",
+      children: [sourcePanel, cavityPanel, readoutPanel],
+    });
+    controlRow.left = this.layoutBounds.minX + SCREEN_VIEW_MARGIN;
+    controlRow.top = topRow.bottom + PANEL_SPACING;
+
     const resetAllButton = new ResetAllButton({
       ...FLAT_RESET_ALL_BUTTON_OPTIONS,
       listener: () => {
@@ -91,37 +115,21 @@ export class FabryPerotScreenView extends ScreenView {
       right: this.layoutBounds.maxX - SCREEN_VIEW_MARGIN,
       bottom: this.layoutBounds.maxY - SCREEN_VIEW_MARGIN,
     });
-    this.addChild(resetAllButton);
 
-    // ── Accessibility: keyboard / reading traversal order ───────────────────────
-    // Make the parallel DOM (Tab order and screen-reader reading order)
-    // deterministic and independent of child z-order. ScreenView throws if you
-    // set pdomOrder on itself, so add a lightweight wrapper Node that "borrows"
-    // the interactive nodes in the order a user should reach them — Reset All
-    // last. Non-interactive decoration (background, placeholder) is omitted.
+    this.children = [topRow, controlRow, resetAllButton];
+
     this.addChild(
       new Node({
-        pdomOrder: [
-          // TODO: add the sim's interactive nodes here, in traversal order
-          resetAllButton,
-        ],
+        pdomOrder: [sourcePanel, cavityPanel, resetAllButton],
       }),
     );
   }
 
-  /**
-   * Resets view-side state (animations, panel visibility, etc.).
-   * Called by the Reset All button listener.
-   */
   public reset(): void {
-    // TODO: reset any view-side state here
+    // All state lives in the model.
   }
 
-  /**
-   * Steps the view forward by dt seconds for animation.
-   * @param _dt - elapsed time in seconds
-   */
   public override step(_dt: number): void {
-    // TODO: implement animation updates here
+    // The scan is advanced by the model; the view repaints on change.
   }
 }

@@ -1,16 +1,42 @@
 # Interferometry Lab
 
-A reusable SceneryStack simulation template for one or N screens, built with
+An interactive physical-optics simulation of the three interferometers every optics course
+covers — **Michelson**, **Mach-Zehnder** and **Fabry-Pérot** — built with
 [SceneryStack](https://scenerystack.org/), Vite 8, TypeScript 7, and Biome 2.
+
+Geometric-optics simulators are common. This one is a *physical* optics simulator: it tracks
+optical path length, phase and partial coherence, and renders the interference pattern those
+produce rather than drawing a picture of one.
+
+**[Launch the simulation →](https://openphysics.github.io/InterferometryLab)**
 
 ## Features
 
-- SceneryStack scaffold with model/view separation (`rename` + `scaffold-screens` for one or N screens)
+- **Michelson** — coarse and micrometer mirror travel, mirror tilt to drive circular fringes into
+  straight ones, an evacuable gas cell for the classic index-of-refraction measurement, a
+  compensator plate, and a fringe counter
+- **Mach-Zehnder** — both complementary output ports shown at once, an insertable sample slide
+  with adjustable thickness, index and tilt, and a single-photon mode that builds the pattern one
+  detection at a time, with a which-path marker that erases it
+- **Fabry-Pérot** — mirror reflectance from 0.04 to 0.99, absorption, cavity spacing and a
+  scanning mode, with live finesse, free spectral range and resolving power, plus a transmission
+  spectrum showing whether two lines are resolved
+- **Six light sources** from a helium-neon laser to white light, spanning 200 mm to 1 µm of
+  coherence length — including the sodium doublet and its visibility beats
+- Physically computed colour: white-light fringes come out with the correct achromatic centre and
+  coloured orders, summed in linear light through CIE XYZ
+- Full keyboard access and live screen-reader descriptions of the pattern
 - English, Spanish, and French localization via `StringManager`
 - Default and projector color profiles
 - Progressive Web App (installable, offline-capable)
-- Git hooks for Biome pre-commit checks
 - Shared GitHub Actions CI via `OpenPhysics/Baton`
+
+### Documentation
+
+| Document | Contents |
+|---|---|
+| [`doc/model.md`](doc/model.md) | The physics: coherence, path difference, the three instruments |
+| [`doc/implementation-notes.md`](doc/implementation-notes.md) | Architecture, the renderer, the colour pipeline |
 
 ## Quick Start
 
@@ -35,8 +61,6 @@ npm start        # dev server → http://localhost:5173
 | `npm run format` | Auto-format all files |
 | `npm run fix` | Lint + auto-fix |
 | `npm run icons` | Regenerate PNG icons from `public/icons/icon.svg` |
-| `npm run rename` | Sim-level fork/rename (`--id`, `--name`) |
-| `npm run scaffold-screens` | Emit N fleet-named screen packages from `michelson/` (`--shared-model` optional) |
 | `npm run clean` | Remove `dist/` |
 
 New sims start at `version: "0.0.0"` in `package.json`. Bump only when cutting a release (for example `npm version patch` and a matching git tag). Keep `name` in kebab-case; it is separate from the SceneryStack sim identifier in `src/init.ts`.

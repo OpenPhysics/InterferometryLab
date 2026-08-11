@@ -1,38 +1,55 @@
 /**
  * FabryPerotScreenSummaryContent.ts
  *
- * The accessible screen summary read by screen readers (SceneryStack's
- * Interactive Description). It appears at the top of the parallel DOM and gives
- * a non-visual user a way to orient themselves and to re-read the simulation's
- * current state at any time.
+ * The accessible screen summary for the Fabry-Pérot screen.
  *
- * A summary has four regions (all optional, but provide at least the first
- * three in every sim for consistency across OpenPhysics):
- *   - playAreaContent       — what the play area contains
- *   - controlAreaContent    — what the controls do
- *   - currentDetailsContent — a LIVE paragraph describing current state
- *   - interactionHintContent — a short hint on how to get started
- *
- * ── Making "current details" live ─────────────────────────────────────────────
- * The template has no model state, so currentDetails is a static string. In a
- * real sim, build a DerivedProperty over the relevant model Properties and pass
- * it as `currentDetailsContent` so the paragraph updates as the sim runs.
- * See LunarLander/src/.../LunarLanderScreenSummaryContent.ts for the pattern.
+ * The live paragraph leads with reflectance and finesse rather than with the
+ * picture, because on this screen the picture is a consequence: how sharp the
+ * rings look, and whether two lines can be told apart, both follow from those
+ * two numbers, and they are the ones a student is being asked to reason about.
  */
+
+import { DerivedProperty } from "scenerystack/axon";
+import { StringUtils } from "scenerystack/phetcommon";
 import { ScreenSummaryContent } from "scenerystack/sim";
+import { lengthProperty, percentProperty, plainProperty } from "../../common/view/formatters.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import type { FabryPerotModel } from "../model/FabryPerotModel.js";
 
 export class FabryPerotScreenSummaryContent extends ScreenSummaryContent {
-  // `model` is unused in the template but kept in the signature so real sims can
-  // derive a live currentDetailsContent from it without changing call sites.
-  public constructor(_model: FabryPerotModel) {
-    const a11y = StringManager.getInstance().getFabryPerotA11yStrings();
+  public constructor(model: FabryPerotModel) {
+    const strings = StringManager.getInstance();
+    const a11y = strings.getFabryPerotA11yStrings();
+
+    const resolutionDetailProperty = new DerivedProperty(
+      [
+        model.twinLineProperty,
+        model.resolvedProperty,
+        a11y.singleLineDetailStringProperty,
+        a11y.resolvedDetailStringProperty,
+        a11y.unresolvedDetailStringProperty,
+      ],
+      (twinLine, resolved, singleLine, resolvedText, unresolvedText) =>
+        !twinLine ? singleLine : resolved ? resolvedText : unresolvedText,
+    );
+
+    const currentDetailsProperty = new DerivedProperty(
+      [
+        a11y.currentDetailsStringProperty,
+        percentProperty(model.reflectanceProperty, 0),
+        plainProperty(model.finesseProperty, 1),
+        lengthProperty(model.effectiveSpacingProperty, 1),
+        lengthProperty(model.freeSpectralRangeProperty, 3),
+        resolutionDetailProperty,
+      ],
+      (pattern, reflectance, finesse, spacing, freeSpectralRange, resolutionDetail) =>
+        StringUtils.fillIn(pattern, { reflectance, finesse, spacing, freeSpectralRange, resolutionDetail }),
+    );
 
     super({
       playAreaContent: a11y.screenSummary.playAreaStringProperty,
       controlAreaContent: a11y.screenSummary.controlAreaStringProperty,
-      currentDetailsContent: a11y.currentDetailsStringProperty,
+      currentDetailsContent: currentDetailsProperty,
       interactionHintContent: a11y.screenSummary.interactionHintStringProperty,
     });
   }

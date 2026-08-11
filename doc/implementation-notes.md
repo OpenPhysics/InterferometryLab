@@ -1,135 +1,174 @@
-# Implementation Notes - Interferometry Lab
+# Interferometry Lab — Implementation Notes
 
-Developer-facing notes on the **SceneryStackTemplate** scaffold. **Replace and expand this file when
-forking** to describe your sim's real architecture (see Stern Gerlach or Light Propagation for
-target quality). Until then, this documents what the template provides out of the box.
+Architecture and the decisions behind it. The physics is in [model.md](model.md).
 
-## Architecture Overview
+## The central abstraction: FringeSpec
 
-SceneryStackTemplate is the fleet-canonical starting point for new SceneryStack sims (one or N screens).
-It demonstrates Model–View separation, color profiles, localization, reset behavior, accessibility
-reference wiring, and reusable common components — **without** domain physics.
+Three quite different instruments share one renderer. They do it through
+[`src/common/model/FringeSpec.ts`](../src/common/model/FringeSpec.ts), which is the contract
+between a screen's model and the detector:
 
-```
-main.ts
-  └─ MichelsonScreen             (Screen<MichelsonModel, MichelsonScreenView>)
-       ├─ MichelsonModel          state + logic  (src/michelson/model/)  ← stub: add physics here
-       └─ MichelsonScreenView     visuals        (src/michelson/view/)
-            ├─ MichelsonScreenSummaryContent     (PDOM overview — reference a11y pattern)
-            └─ MichelsonKeyboardHelpContent      (keyboard help dialog)
-
-src/common/
-  ├─ InterferometryLabPanel.ts           pre-themed panel (uses InterferometryLabColors)
-  ├─ InterferometryLabButtonOptions.ts   flat button / combo-box option bundles
-  └─ TimeModel.ts          composable play/pause + elapsed time
-
-src/preferences/
-  ├─ InterferometryLabPreferencesModel   sim-specific pref state
-  ├─ InterferometryLabPreferencesNode    pref UI in Preferences → Simulation
-  └─ interferometryLabQueryParameters    QueryStringMachine declarations
+```ts
+type FringeSpec = {
+  geometry: FringeGeometry;              // how path difference varies over the detector
+  groups:   readonly FringeGroup[];      // the source spectrum, ready to render
+  terms:    TwoBeamTerms | MultiBeamTerms;   // how the light recombines
+  contrast: number;                      // blanket visibility multiplier
+  exposure: number;                      // display gain
+};
 ```
 
-Data flows Model → View through AXON `Property` objects (`.link()` / `.lazyLink()`). The view never
-integrates physics; the model never imports scenery.
+Each screen's model reduces its whole optical layout — arm lengths, mirror tilts, inserted
+samples, cavity spacing — to one of these. The renderer knows nothing about mirrors or beam
+splitters; it evaluates this description per pixel.
 
-## Forking checklist
+Two things fall out of that boundary and both were the reason for drawing it:
 
-### Automated rename + scaffold (recommended)
+1. **The physics is a pure function of plain data.** `fringeIntensity.ts` takes a spec and a
+   position and returns an intensity, with no Scenery dependency anywhere. The unit tests
+   exercise exactly the code the screens run.
+2. **Adding an instrument does not touch the renderer.** A fourth interferometer would be a new
+   model that emits a `FringeSpec`.
 
-```sh
-npm run rename -- --id my-sim --name "My Simulation"
-npm run scaffold-screens -- --screens Intro,Lab   # or omit --screens for one screen
-npm run check
-```
+`FringeGroup` carries a per-colour path offset (`opdOffsetNm`) as well as the spectral group.
+That exists because dispersion is real: uncompensated glass in one arm is worth a different
+number of wavelengths to red light than to blue, so a single global path difference cannot
+describe the instrument. Each group gets its own offset and the renderer adds it before working
+out either the phase or the coherence envelope.
 
-Or from the workspace: `Baton/scripts/create-sim.sh --repo MySim --name "My Simulation"`.
+## Rendering on the CPU, not in a shader
 
-`scripts/rename-sim.ts` updates sim-level identifiers (package id, Colors, Preferences).
-`scripts/scaffold-screens.ts` emits fleet-named screen folders and wires main/strings/icons.
+A per-pixel intensity formula is a natural fit for a fragment shader, and this one would suit
+one well. It is not used. Measured on a 2020-era laptop, at a 240 × 240 sample grid:
 
-### Manual steps (after rename/scaffold or if skipping the scripts)
-
-1. **`doc/model.md`** — educator physics (equations, ranges, simplifications).
-2. **`doc/implementation-notes.md`** — this file, rewritten for your architecture.
-3. **Screen model(s)** — real Properties, `step(dt)`, `reset()`; compose `TimeModel` if animated.
-4. **Screen view(s)** — play area + controls; wire `ResetAllButton` to `model.reset()`.
-5. **`*Colors.ts`** — sim palette (default + projector profiles).
-6. **Locale JSON** — title, strings, `a11y` keys; register locales in `init.ts`.
-7. **`public/icons/icon.svg`** → `npm run icons`; align theme color in `index.html` / vite config.
-8. **`tests/setup.ts`** — `init({ name: … })` must match `package.json` name after rename.
-9. **`CLAUDE.md`** — sim-specific file map and pitfalls for AI assistants.
-
-## Common components (keep when forking)
-
-### InterferometryLabPanel
-
-Every control panel should use `InterferometryLabPanel` so projector-mode switching is automatic:
-
-```typescript
-import { InterferometryLabPanel } from "../../common/InterferometryLabPanel.js";
-const panel = new InterferometryLabPanel(content);
-const panelWide = new InterferometryLabPanel(content, { xMargin: 20 });
-```
-
-### TimeModel
-
-Compose into your screen model for animation (do not subclass `TimeModel`):
-
-```typescript
-export class MyModel implements TModel {
-  public readonly timer = new TimeModel();  // pass true to auto-play on startup
-
-  public step(dt: number): void {
-    this.timer.step(dt);
-    // physics uses this.timer.timeProperty.value
-  }
-  public reset(): void { this.timer.reset(); /* restore initial state */ }
-}
-```
-
-Wire `TimeControlNode` to `model.timer.isPlayingProperty` in the view.
-
-### InterferometryLabButtonOptions
-
-Spread flat button options into every push/round button and `TimeControlNode` (see `CLAUDE.md`).
-Use `INTERFEROMETRY_LAB_COMBO_BOX_OPTIONS` + `LIGHT_SURFACE_TEXT_FILL` for light control surfaces on dark panels.
-
-## Accessibility (reference implementation)
-
-The template is the **canonical OpenPhysics a11y reference**:
-
-- PDOM `accessibleName` on interactive nodes (prefer live `StringProperty`s).
-- `MichelsonScreenSummaryContent` with a live `currentDetailsContent` `DerivedProperty` over model state.
-- Explicit `pdomOrder` + `MichelsonKeyboardHelpContent`.
-- Strings under `a11y` in locale JSON → `StringManager.getMichelsonA11yStrings()`.
-
-Full checklist: [Baton/ACCESSIBILITY.md](https://github.com/OpenPhysics/Baton/blob/main/ACCESSIBILITY.md).
-
-## Testing (fleet layout — keep when forking)
-
-| Path | Purpose |
+| Case | Time per frame |
 |---|---|
-| `vitest.config.ts` | `happy-dom`; `setupFiles: ["./tests/setup.ts"]`; `execArgv: ["--expose-gc"]` |
-| `tests/setup.ts` | Canvas/AudioContext mocks + `init()` before SceneryStack imports |
-| `tests/TimeModel.test.ts` | **Replace** with real model/physics tests mirroring `src/` |
-| `tests/memory-leak.test.ts` | WeakRef + `forceGC` dispose regression |
-| `tests/fuzz/fuzz.spec.ts` | Optional Playwright smoke via `?fuzz` |
+| Monochromatic (1 spectral group) | ≈ 3–4 ms |
+| Broadband (12 groups) | ≈ 24 ms |
 
-Run `npm test`. Expand `memory-leak.test.ts` when adding runtime-created nodes or Property links.
+A monochromatic frame is comfortably inside the 16 ms budget, and that is the case that has to
+stay smooth — it is what is on screen while a slider is being dragged. Broadband is handled by
+dropping to a 120 × 120 grid (a quarter of the pixels, ≈ 6 ms); broadband fringes are
+low-contrast and blurred, so the lost resolution is not visible.
 
-## Multi-screen simulations
+Against that, staying on the CPU keeps the physics in one testable TypeScript module instead of
+duplicated into GLSL, and there is no WebGL context to lose or fall back from. If a future screen
+needs more, `FringePatternNode` is the only file that would change.
 
-Default is single-screen. To add screens, see **`doc/multi-screen.md`**: per-screen folders mirroring
-`src/michelson/`, `StringManager` screen-name getters, optional shared root model, a shared
-`src/common/InterferometryLabScreenIcons.ts` module (`create{Screen}Icon()` factories wired as
-`homeScreenIcon` / `navigationBarIcon`), and register all screens in `main.ts`.
+**Loop shape.** The render loop runs pixel-outer, group-inner, over a plan built once per
+repaint. Path difference depends only on position, so it is computed once per pixel and shared by
+every colour in the spectrum; the per-group constants (display colour, share of power, exposure,
+white balance) are folded into the plan up front. The per-pixel work is then just calls into the
+shared physics module.
 
-## PWA
+**Repaint policy.** The pattern is repainted when its `FringeSpec` changes, not on a clock. A
+static scene costs nothing.
 
-After `npm run build`, the sim is installable offline via Workbox (`dist/manifest.webmanifest`).
+## Colour is computed in linear light through CIE XYZ
 
-## Known template stubs (remove when forking)
+`src/common/view/spectralColor.ts` converts wavelengths to colour and adds them the way light
+adds. This is not the obvious approach — looking up an sRGB value per wavelength is — and it is
+worth saying why the obvious approach fails, because the first implementation used it and the
+result was visibly wrong.
 
-- `MichelsonModel.step()` / `reset()` — empty placeholders until you add physics.
-- Placeholder play-area content in `MichelsonScreenView` — replace with real UI.
-- `tests/TimeModel.test.ts` — sample only; add tests for your model under `tests/`.
+A white-light interferogram is the sum of fifteen overlapping single-wavelength patterns. Summing
+sRGB triples breaks that in two ways:
+
+1. **sRGB is gamma-encoded.** Adding encoded values is not adding light. Fringe contrast comes
+   out wrong.
+2. **Summing per-wavelength sRGB approximations across the visible band does not produce white.**
+   It produces a yellow-green, because those approximations are clipped renderings of saturated
+   colours rather than tristimulus responses that are additive by construction.
+
+So the module works in CIE XYZ, where additivity is the defining property. Colour matching
+functions come from the multi-lobe Gaussian fits in Wyman, Sloan & Shirley (JCGT 2013); each
+wavelength contributes its `x̄ȳz̄`, the sum converts once to linear sRGB, and the gamma encoding
+happens last, at the pixel, through a lookup table so the inner loop never calls `Math.pow`.
+
+One further correction: sRGB's white point is D65, not the flat spectrum a broadband lamp is
+modelled as, so each channel is divided by the linear sRGB of an equal-energy spectrum. That is
+an ordinary white balance, and it is why the broadband source renders white rather than straw.
+
+## Source code layout
+
+```
+src/
+  InterferometryLabColors.ts       ProfileColorProperty entries
+  InterferometryLabConstants.ts    every named magnitude, in SI or nm
+  common/
+    model/
+      FringeSpec.ts                the model → renderer contract
+      fringeIntensity.ts           pure per-point interference maths
+      spectrum.ts                  coherence, line splitting, visibility
+      refractiveIndex.ts           gases, N-BK7 Sellmeier, tilted plates
+      LightSourceModel.ts          source selection → spectrum
+      SourceType.ts
+    view/
+      FringePatternNode.ts         the renderer
+      DetectorScreenNode.ts        bezelled detector + overlay layer
+      OpticalTableNode.ts          breadboard background
+      BeamPathNode.ts              a beam: bright core in a soft halo
+      opticNodes.ts                mirror / splitter / cell / lens factories
+      spectralColor.ts             CIE XYZ colour pipeline
+      sourceColor.ts               spectrum → beam colour
+      LightSourcePanel.ts          shared source controls
+      InterferometryLabNumberControl.ts, ReadoutBlock.ts, TitledPanel.ts,
+      controlFactory.ts, formatters.ts
+  michelson/ | mach-zehnder/ | fabry-perot/
+      model/  view/                one folder per screen
+```
+
+## Keyboard steps are a per-control decision
+
+`InterferometryLabNumberControl` requires an accessible name and makes the keyboard steps
+explicit rather than defaulted. The reason is the range problem: the same coarse slider that
+travels ±200 µm also needs nudging by tens of nanometres, because that is the scale on which the
+output changes. Every control sets its own arrow, shift-arrow and page steps, and several of them
+are only usable from the keyboard at their finest step. That is also why both screens' keyboard
+help leads with the slider section.
+
+The Michelson's coarse stage and the Fabry-Pérot's spacing both drive a `UnitConversionProperty`
+so the control reads micrometres while the model keeps nanometres.
+
+## Single-photon sampling
+
+`MachZehnderModel.step` draws photons from the joint distribution of the two ports. It never
+assigns a photon to a path — a photon with a definite route could not produce fringes.
+
+Because the two ports' intensities sum to the full beam at every point, the sampling is exact
+rather than rejection-based: the position is uniform over the aperture, and the local phase sets
+the probability of port A. Every emitted photon is detected, which is asserted in the tests.
+
+Marks are drawn to a canvas as 2 px squares rather than as scenery nodes or arcs: there can be
+several thousand of them, they are never interactive, and at that size the path overhead of
+`arc()` dominates the cost.
+
+## Tests
+
+124 vitest specs under `tests/`, environment `happy-dom` with the template's `tests/setup.ts`.
+
+| File | Covers |
+|---|---|
+| `spectrum.test.ts` | coherence length, visibility envelopes, doublet beats, line splitting |
+| `fringeIntensity.test.ts` | detector geometry, two-beam and Airy intensity, finesse |
+| `refractiveIndex.test.ts` | Sellmeier against published indices, Gladstone-Dale, tilted plates |
+| `interferometerModels.test.ts` | all three screen models: derived values, controls, reset |
+| `memory-leak.test.ts` | dispose/WeakRef regression, extended to the two listening nodes |
+| `TimeModel.test.ts` | template model retained |
+
+Several assertions are anchored to published numbers rather than to the implementation — N-BK7's
+index at the helium-neon and sodium lines, its Abbe number, air's refractivity — so a wrong
+constant fails rather than being locked in.
+
+**One template fix carried here.** The template's `memory-leak.test.ts` calls `forceGC()` with no
+early-exit condition in its final test, which runs all fifteen `gc()` passes and exceeds the 30 s
+timeout in this environment — it fails on a pristine template checkout too. The local copy takes
+a predicate and bails as soon as everything is collected. Worth upstreaming.
+
+## Documented deviations
+
+- **`src/common/view/spectralColor.ts`** replaces scenery-phet's `VisibleColor` for anything that
+  gets summed, for the reasons above. `VisibleColor` is still fine for single-wavelength UI
+  chrome; it is simply not additive.
+- **Constants** live in one root `InterferometryLabConstants.ts`, per the fleet default.
+- **`tests/fuzz/`** and `playwright.config.ts` are the template's, unchanged.

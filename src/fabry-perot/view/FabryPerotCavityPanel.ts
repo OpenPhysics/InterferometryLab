@@ -1,0 +1,94 @@
+/**
+ * FabryPerotCavityPanel.ts
+ *
+ * The cavity's own parameters: how reflective its mirrors are, how lossy, and
+ * how far apart.
+ *
+ * Reflectance is the control worth spending time on. Everything else here trades
+ * one property for another — wider spacing buys resolution and spends free
+ * spectral range — but raising R improves the resolving power at no cost in free
+ * spectral range at all. The only thing it costs is light, and the absorption
+ * slider is here so that limit is visible too: with even a percent of loss in the
+ * coatings, a very high reflectance leaves peaks that are beautifully sharp and
+ * almost too dim to use.
+ */
+
+import { UnitConversionProperty } from "scenerystack/axon";
+import { createCheckbox } from "../../common/view/controlFactory.js";
+import { InterferometryLabNumberControl } from "../../common/view/InterferometryLabNumberControl.js";
+import { TitledPanel } from "../../common/view/TitledPanel.js";
+import { ABSORPTANCE_RANGE, NM_PER_UM, REFLECTANCE_RANGE } from "../../InterferometryLabConstants.js";
+import { StringManager } from "../../i18n/StringManager.js";
+import type { FabryPerotModel } from "../model/FabryPerotModel.js";
+
+export class FabryPerotCavityPanel extends TitledPanel {
+  public constructor(model: FabryPerotModel, contentWidth: number) {
+    const strings = StringManager.getInstance();
+    const fabryPerot = strings.getFabryPerotStrings();
+    const units = strings.getUnits();
+    const a11y = strings.getFabryPerotA11yStrings().controls;
+
+    const reflectanceControl = new InterferometryLabNumberControl(
+      fabryPerot.reflectanceStringProperty,
+      model.reflectanceProperty,
+      REFLECTANCE_RANGE,
+      {
+        accessibleName: a11y.reflectanceStringProperty,
+        decimals: 2,
+        delta: 0.01,
+        keyboardStep: 0.01,
+        shiftKeyboardStep: 0.005,
+        pageKeyboardStep: 0.1,
+        majorTicks: [
+          { value: REFLECTANCE_RANGE.min, label: "0.04" },
+          { value: REFLECTANCE_RANGE.max, label: "0.99" },
+        ],
+      },
+    );
+
+    const absorptanceControl = new InterferometryLabNumberControl(
+      fabryPerot.absorptanceStringProperty,
+      model.absorptanceProperty,
+      ABSORPTANCE_RANGE,
+      {
+        accessibleName: a11y.absorptanceStringProperty,
+        decimals: 3,
+        delta: 0.001,
+        keyboardStep: 0.005,
+        shiftKeyboardStep: 0.001,
+        pageKeyboardStep: 0.02,
+      },
+    );
+
+    // The model keeps every optical length in nanometres; a spacing that reads
+    // "100000 nm" helps nobody, so the control drives a micrometre view of it.
+    const spacingMicrometersProperty = new UnitConversionProperty(model.spacingProperty, {
+      factor: 1 / NM_PER_UM,
+    });
+
+    const spacingControl = new InterferometryLabNumberControl(
+      fabryPerot.spacingStringProperty,
+      spacingMicrometersProperty,
+      spacingMicrometersProperty.range,
+      {
+        accessibleName: a11y.spacingStringProperty,
+        valuePattern: units.micrometersStringProperty,
+        decimals: 1,
+        delta: 0.5,
+        keyboardStep: 5,
+        shiftKeyboardStep: 0.5,
+        pageKeyboardStep: 25,
+      },
+    );
+
+    const scanCheckbox = createCheckbox(
+      model.scanningProperty,
+      fabryPerot.scanCavityStringProperty,
+      a11y.scanCavityStringProperty,
+    );
+
+    super(fabryPerot.cavityStringProperty, [reflectanceControl, absorptanceControl, spacingControl, scanCheckbox], {
+      contentWidth,
+    });
+  }
+}

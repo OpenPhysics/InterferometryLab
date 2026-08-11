@@ -1,38 +1,117 @@
 /**
  * MichelsonScreenSummaryContent.ts
  *
- * The accessible screen summary read by screen readers (SceneryStack's
- * Interactive Description). It appears at the top of the parallel DOM and gives
- * a non-visual user a way to orient themselves and to re-read the simulation's
- * current state at any time.
+ * The accessible screen summary read by screen readers.
  *
- * A summary has four regions (all optional, but provide at least the first
- * three in every sim for consistency across OpenPhysics):
- *   - playAreaContent       — what the play area contains
- *   - controlAreaContent    — what the controls do
- *   - currentDetailsContent — a LIVE paragraph describing current state
- *   - interactionHintContent — a short hint on how to get started
- *
- * ── Making "current details" live ─────────────────────────────────────────────
- * The template has no model state, so currentDetails is a static string. In a
- * real sim, build a DerivedProperty over the relevant model Properties and pass
- * it as `currentDetailsContent` so the paragraph updates as the sim runs.
- * See LunarLander/src/.../LunarLanderScreenSummaryContent.ts for the pattern.
+ * The "current details" paragraph is live: it reports the source, the path
+ * difference, the fringe contrast, and — crucially — what *kind* of pattern is
+ * on the detector. A sighted user can see at a glance whether the fringes are
+ * rings, bars, or gone entirely; naming it is how a non-visual user gets the
+ * same information, and it is the one thing the numbers alone do not convey.
  */
+
+import { DerivedProperty } from "scenerystack/axon";
+import { StringUtils } from "scenerystack/phetcommon";
 import { ScreenSummaryContent } from "scenerystack/sim";
+import { opdSpread } from "../../common/model/fringeIntensity.js";
+import { SourceType } from "../../common/model/SourceType.js";
+import { lengthProperty, percentProperty } from "../../common/view/formatters.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import type { MichelsonModel } from "../model/MichelsonModel.js";
 
+/**
+ * Below this contrast the pattern is described as washed out; the fringes are
+ * still there mathematically but nobody could read them off the screen.
+ */
+const WASHED_OUT_VISIBILITY = 0.08;
+
+/**
+ * Tilt (µrad) above which the wedge dominates the ray-angle term and the rings
+ * have straightened into bars.
+ */
+const STRAIGHT_FRINGE_TILT_URAD = 25;
+
 export class MichelsonScreenSummaryContent extends ScreenSummaryContent {
-  // `model` is unused in the template but kept in the signature so real sims can
-  // derive a live currentDetailsContent from it without changing call sites.
-  public constructor(_model: MichelsonModel) {
-    const a11y = StringManager.getInstance().getMichelsonA11yStrings();
+  public constructor(model: MichelsonModel) {
+    const strings = StringManager.getInstance();
+    const a11y = strings.getMichelsonA11yStrings();
+    const common = strings.getCommon();
+
+    const sourceNameProperty = new DerivedProperty(
+      [
+        model.lightSource.sourceTypeProperty,
+        common.heliumNeonStringProperty,
+        common.greenLaserStringProperty,
+        common.blueLaserStringProperty,
+        common.sodiumLampStringProperty,
+        common.filteredLampStringProperty,
+        common.whiteLightStringProperty,
+      ],
+      (type, heliumNeon, green, blue, sodium, filtered, white) =>
+        type === SourceType.HELIUM_NEON
+          ? heliumNeon
+          : type === SourceType.GREEN_LASER
+            ? green
+            : type === SourceType.BLUE_LASER
+              ? blue
+              : type === SourceType.SODIUM_LAMP
+                ? sodium
+                : type === SourceType.FILTERED_LAMP
+                  ? filtered
+                  : white,
+    );
+
+    const patternProperty = new DerivedProperty(
+      [
+        model.visibilityProperty,
+        model.fringeSpecProperty,
+        model.lightSource.meanWavelengthProperty,
+        model.tiltHorizontalProperty,
+        model.tiltVerticalProperty,
+        a11y.patternRingsStringProperty,
+        a11y.patternStraightStringProperty,
+        a11y.patternUniformStringProperty,
+        a11y.patternWashedOutStringProperty,
+      ],
+      (visibility, spec, wavelengthNm, tiltHorizontal, tiltVertical, rings, straight, uniform, washedOut) => {
+        if (visibility < WASHED_OUT_VISIBILITY) {
+          return washedOut;
+        }
+        // With the arms nearly equal and the mirrors parallel there is nothing
+        // to make the path difference vary across the screen, so there is one
+        // fringe and it covers everything. Calling that "circular fringes"
+        // would describe a pattern that is not there.
+        if (opdSpread(spec.geometry) < wavelengthNm) {
+          return uniform;
+        }
+        const tilt = Math.hypot(tiltHorizontal, tiltVertical);
+        return tilt >= STRAIGHT_FRINGE_TILT_URAD ? straight : rings;
+      },
+    );
+
+    const currentDetailsProperty = new DerivedProperty(
+      [
+        a11y.currentDetailsStringProperty,
+        sourceNameProperty,
+        lengthProperty(model.lightSource.meanWavelengthProperty, 1),
+        lengthProperty(model.pathDifferenceProperty, 1),
+        percentProperty(model.visibilityProperty, 0),
+        patternProperty,
+      ],
+      (pattern, source, wavelength, pathDifference, visibility, patternName) =>
+        StringUtils.fillIn(pattern, {
+          source,
+          wavelength,
+          pathDifference,
+          visibility,
+          pattern: patternName,
+        }),
+    );
 
     super({
       playAreaContent: a11y.screenSummary.playAreaStringProperty,
       controlAreaContent: a11y.screenSummary.controlAreaStringProperty,
-      currentDetailsContent: a11y.currentDetailsStringProperty,
+      currentDetailsContent: currentDetailsProperty,
       interactionHintContent: a11y.screenSummary.interactionHintStringProperty,
     });
   }

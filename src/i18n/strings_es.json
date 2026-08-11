@@ -1,47 +1,183 @@
 {
-  "title": "Interferometry Lab",
+  "title": "Laboratorio de interferometría",
   "screens": {
     "michelson": "Michelson",
     "machZehnder": "Mach-Zehnder",
-    "fabryPerot": "Fabry-Perot"
+    "fabryPerot": "Fabry-Pérot"
+  },
+  "common": {
+    "lightSource": "Fuente de luz",
+    "source": "Fuente",
+    "heliumNeon": "Láser de helio-neón",
+    "greenLaser": "Láser verde",
+    "blueLaser": "Láser azul",
+    "sodiumLamp": "Lámpara de sodio",
+    "filteredLamp": "Lámpara filtrada",
+    "whiteLight": "Luz blanca",
+    "wavelength": "Longitud de onda",
+    "bandwidth": "Ancho de banda",
+    "coherenceLength": "Longitud de coherencia",
+    "pathDifference": "Diferencia de camino",
+    "visibility": "Visibilidad de las franjas",
+    "intensity": "Intensidad",
+    "detector": "Detector",
+    "readings": "Lecturas",
+    "laser": "Láser",
+    "beamSplitter": "Divisor de haz",
+    "mirror": "Espejo",
+    "movableMirror": "Espejo móvil",
+    "fixedMirror": "Espejo fijo",
+    "screen": "Pantalla",
+    "unlimited": "ilimitada"
+  },
+  "units": {
+    "nanometers": "{{value}} nm",
+    "micrometers": "{{value}} µm",
+    "millimeters": "{{value}} mm",
+    "picometers": "{{value}} pm",
+    "kilopascals": "{{value}} kPa",
+    "microradians": "{{value}} µrad",
+    "degrees": "{{value}}°",
+    "percent": "{{value}} %",
+    "perSecond": "{{value}}/s",
+    "plain": "{{value}}",
+    "waves": "{{value}} λ"
+  },
+  "michelson": {
+    "arm": "Espejo móvil",
+    "coarse": "Desplazamiento grueso",
+    "micrometer": "Micrómetro",
+    "zeroTheArms": "Igualar los brazos",
+    "fringesCounted": "Franjas contadas",
+    "resetCount": "Reiniciar el conteo",
+    "alignment": "Alineación",
+    "tiltHorizontal": "Inclinar M₂ sobre el eje vertical",
+    "tiltVertical": "Inclinar M₂ sobre el eje horizontal",
+    "compensatorPlate": "Lámina compensadora",
+    "gasCell": "Celda de gas",
+    "insertCell": "Insertar la celda de gas",
+    "pressure": "Presión",
+    "indexOfRefraction": "Índice de refracción",
+    "fringesShifted": "Franjas desplazadas"
+  },
+  "machZehnder": {
+    "pathImbalance": "Desequilibrio de camino",
+    "arms": "Brazos",
+    "tilt": "Inclinar M₂",
+    "sample": "Muestra",
+    "insertSample": "Insertar la lámina de muestra",
+    "thickness": "Espesor",
+    "index": "Índice de refracción",
+    "slideTilt": "Inclinación de la lámina",
+    "addedPath": "Camino óptico añadido",
+    "mode": "Modo",
+    "classical": "Haz continuo",
+    "singlePhoton": "Un fotón a la vez",
+    "photonRate": "Tasa de emisión",
+    "whichPath": "Marcar por qué camino va el fotón",
+    "clearCounts": "Borrar los conteos",
+    "portA": "Puerto A",
+    "portB": "Puerto B",
+    "counts": "Conteos",
+    "photonsEmitted": "Fotones emitidos"
+  },
+  "fabryPerot": {
+    "cavity": "Cavidad",
+    "reflectance": "Reflectancia de los espejos",
+    "absorptance": "Absorción de los espejos",
+    "spacing": "Separación de los espejos",
+    "scanCavity": "Barrer la separación",
+    "finesse": "Fineza",
+    "freeSpectralRange": "Rango espectral libre",
+    "resolvingPower": "Poder de resolución",
+    "peakTransmission": "Transmisión máxima",
+    "order": "Orden en el centro",
+    "sourceLines": "Fuente",
+    "twinLine": "Añadir una segunda línea",
+    "lineSeparation": "Separación de las líneas",
+    "transmission": "Transmisión",
+    "spectrum": "Espectro de transmisión",
+    "resolved": "Las dos líneas están resueltas",
+    "unresolved": "Las dos líneas no están resueltas"
   },
   "a11y": {
     "michelson": {
       "screenSummary": {
-        "playArea": "El área de juego muestra el contenido principal de la simulación.",
-        "controlArea": "El área de control tiene un botón Restablecer todo que devuelve la simulación a su estado inicial.",
-        "interactionHint": "Explora la simulación interactuando con sus controles."
+        "playArea": "Un interferómetro de Michelson sobre una mesa óptica. Un divisor de haz separa en dos la luz de la fuente, la envía a un espejo móvil y a un espejo fijo, y la recombina sobre una pantalla detectora donde se forman las franjas.",
+        "controlArea": "El área de control tiene el selector de fuente de luz, los mandos grueso y micrométrico del espejo móvil, la alineación de los espejos, una celda de gas y un botón Reiniciar todo que devuelve la simulación a su estado inicial.",
+        "interactionHint": "Cambia la posición del espejo móvil para desplazar las franjas, o cambia de fuente para ver cómo la longitud de coherencia limita la diferencia de camino."
       },
-      "currentDetails": "La simulación está en su estado inicial.",
+      "currentDetails": "La fuente es {{source}} a {{wavelength}}. La diferencia de camino óptico es {{pathDifference}} y la visibilidad de las franjas es {{visibility}}. El patrón muestra {{pattern}}.",
+      "patternRings": "franjas circulares",
+      "patternStraight": "franjas rectas",
+      "patternUniform": "una sola franja que llena todo el campo",
+      "patternWashedOut": "ninguna franja, solo luz uniforme",
       "controls": {
-        "exampleControl": "Control de ejemplo"
+        "sourcePicker": "Fuente de luz",
+        "wavelength": "Longitud de onda de la fuente",
+        "bandwidth": "Ancho de banda de la fuente",
+        "coarse": "Desplazamiento grueso del espejo móvil",
+        "micrometer": "Micrómetro del espejo móvil",
+        "zeroTheArms": "Igualar los brazos",
+        "resetCount": "Reiniciar el conteo de franjas",
+        "tiltHorizontal": "Inclinación del espejo fijo sobre el eje vertical",
+        "tiltVertical": "Inclinación del espejo fijo sobre el eje horizontal",
+        "compensatorPlate": "Lámina compensadora en el haz",
+        "insertCell": "Celda de gas en el haz",
+        "pressure": "Presión de la celda de gas"
       }
     },
     "machZehnder": {
       "screenSummary": {
-        "playArea": "El área de juego muestra el contenido principal de la simulación.",
-        "controlArea": "El área de control tiene un botón Restablecer todo que devuelve la simulación a su estado inicial.",
-        "interactionHint": "Explora la simulación interactuando con sus controles."
+        "playArea": "Un interferómetro de Mach-Zehnder. Un divisor de haz envía la luz por dos caminos separados, dos espejos los vuelven a juntar y un segundo divisor los recombina en dos puertos de salida, cada uno con su detector.",
+        "controlArea": "El área de control tiene el selector de fuente de luz, los mandos de desequilibrio de camino e inclinación de los espejos, una lámina de muestra insertable, la elección entre haz continuo y fotones individuales, y un botón Reiniciar todo que devuelve la simulación a su estado inicial.",
+        "interactionHint": "Cambia el desequilibrio de camino y observa cómo la luz pasa de un puerto al otro, o inclina un espejo para extender el patrón en franjas."
       },
-      "currentDetails": "La simulación está en su estado inicial.",
+      "currentDetails": "La diferencia de camino óptico es {{pathDifference}}. El puerto A recibe {{portA}} de la luz y el puerto B recibe {{portB}}. {{modeDetail}}",
+      "classicalDetail": "El haz es continuo.",
+      "photonDetail": "Se han emitido {{emitted}} fotones; {{countsA}} llegaron al puerto A y {{countsB}} al puerto B.",
+      "whichPathDetail": "El marcador de camino está activado, así que los dos caminos ya no interfieren.",
       "controls": {
-        "exampleControl": "Control de ejemplo"
+        "sourcePicker": "Fuente de luz",
+        "wavelength": "Longitud de onda de la fuente",
+        "bandwidth": "Ancho de banda de la fuente",
+        "pathImbalance": "Desequilibrio de camino",
+        "tiltHorizontal": "Inclinación del espejo sobre el eje vertical",
+        "tiltVertical": "Inclinación del espejo sobre el eje horizontal",
+        "insertSample": "Lámina de muestra en el haz",
+        "thickness": "Espesor de la muestra",
+        "index": "Índice de refracción de la muestra",
+        "slideTilt": "Inclinación de la lámina de muestra",
+        "mode": "Modo del haz",
+        "photonRate": "Tasa de emisión de fotones",
+        "whichPath": "Marcador de camino",
+        "clearCounts": "Borrar los conteos de fotones"
       }
     },
     "fabryPerot": {
       "screenSummary": {
-        "playArea": "El área de juego muestra el contenido principal de la simulación.",
-        "controlArea": "El área de control tiene un botón Restablecer todo que devuelve la simulación a su estado inicial.",
-        "interactionHint": "Explora la simulación interactuando con sus controles."
+        "playArea": "Un interferómetro de Fabry-Pérot. La luz entra en una cavidad entre dos espejos parcialmente reflectantes y rebota muchas veces antes de salir, de modo que muchos haces interfieren a la vez y los anillos transmitidos son mucho más finos que las franjas de dos haces.",
+        "controlArea": "El área de control tiene la longitud de onda de la fuente y una segunda línea opcional, la reflectancia, la absorción y la separación de los espejos de la cavidad, y un botón Reiniciar todo que devuelve la simulación a su estado inicial.",
+        "interactionHint": "Aumenta la reflectancia de los espejos y observa cómo los anillos anchos se estrechan hasta convertirse en picos finos."
       },
-      "currentDetails": "La simulación está en su estado inicial.",
+      "currentDetails": "La reflectancia de los espejos es {{reflectance}}, lo que da una fineza de {{finesse}}. La separación de la cavidad es {{spacing}} y el rango espectral libre es {{freeSpectralRange}}. {{resolutionDetail}}",
+      "resolvedDetail": "Las dos líneas de la fuente están resueltas.",
+      "unresolvedDetail": "Las dos líneas de la fuente no están resueltas.",
+      "singleLineDetail": "La fuente tiene una sola línea.",
       "controls": {
-        "exampleControl": "Control de ejemplo"
+        "wavelength": "Longitud de onda de la fuente",
+        "twinLine": "Segunda línea de la fuente",
+        "lineSeparation": "Separación entre las dos líneas de la fuente",
+        "reflectance": "Reflectancia de los espejos",
+        "absorptance": "Absorción de los espejos",
+        "spacing": "Separación de los espejos",
+        "scanCavity": "Barrer la separación de los espejos"
       }
     }
   },
   "preferences": {
     "title": "Simulación",
-    "exampleToggle": "Ejemplo de alternancia"
+    "showOpticalPath": "Mostrar los caminos ópticos",
+    "showOpticalPathDescription": "Etiquetar cada tramo del haz en la mesa con el camino óptico que acumula."
   }
 }

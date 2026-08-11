@@ -11,7 +11,7 @@
  * 2. If it should also be user-editable at runtime, surface it as a preference
  *    in InterferometryLabPreferencesModel (initialize that Property from this query parameter).
  *
- * Usage: append e.g. `?exampleToggle=true` to the sim URL.
+ * Usage: append e.g. `?showOpticalPath=true` to the sim URL.
  */
 
 import { logGlobal } from "scenerystack/phet-core";
@@ -20,10 +20,12 @@ import InterferometryLabNamespace from "../InterferometryLabNamespace.js";
 
 const interferometryLabQueryParameters = QueryStringMachine.getAll({
   /**
-   * Example public boolean parameter. Replace with real sim-specific parameters,
-   * or remove if the sim has none.
+   * Label each beam segment on the optical table with the optical path length it
+   * accumulates. Off by default: the numbers are the point of the sim, but they
+   * crowd the table, so they are opt-in for students who are tracking the
+   * bookkeeping rather than watching the fringes.
    */
-  exampleToggle: {
+  showOpticalPath: {
     type: "boolean",
     defaultValue: false,
     public: true,

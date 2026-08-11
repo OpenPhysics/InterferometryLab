@@ -88,6 +88,31 @@ export class StringManager {
     };
   }
 
+  /** Labels shared by more than one screen: source names, optic names, readout labels. */
+  public getCommon() {
+    return stringProperties.common;
+  }
+
+  /** Unit-formatting patterns; each takes a `{{value}}` placeholder. */
+  public getUnits() {
+    return stringProperties.units;
+  }
+
+  /** Control labels specific to the Michelson screen. */
+  public getMichelsonStrings() {
+    return stringProperties.michelson;
+  }
+
+  /** Control labels specific to the Mach-Zehnder screen. */
+  public getMachZehnderStrings() {
+    return stringProperties.machZehnder;
+  }
+
+  /** Control labels specific to the Fabry-Pérot screen. */
+  public getFabryPerotStrings() {
+    return stringProperties.fabryPerot;
+  }
+
   /** Accessibility strings for the Michelson screen. */
   public getMichelsonA11yStrings() {
     return stringProperties.a11y.michelson;

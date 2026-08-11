@@ -1,47 +1,183 @@
 {
-  "title": "Interferometry Lab",
+  "title": "Laboratoire d'interférométrie",
   "screens": {
     "michelson": "Michelson",
     "machZehnder": "Mach-Zehnder",
-    "fabryPerot": "Fabry-Perot"
+    "fabryPerot": "Fabry-Pérot"
+  },
+  "common": {
+    "lightSource": "Source lumineuse",
+    "source": "Source",
+    "heliumNeon": "Laser hélium-néon",
+    "greenLaser": "Laser vert",
+    "blueLaser": "Laser bleu",
+    "sodiumLamp": "Lampe à sodium",
+    "filteredLamp": "Lampe filtrée",
+    "whiteLight": "Lumière blanche",
+    "wavelength": "Longueur d'onde",
+    "bandwidth": "Largeur spectrale",
+    "coherenceLength": "Longueur de cohérence",
+    "pathDifference": "Différence de marche",
+    "visibility": "Visibilité des franges",
+    "intensity": "Intensité",
+    "detector": "Détecteur",
+    "readings": "Mesures",
+    "laser": "Laser",
+    "beamSplitter": "Séparatrice",
+    "mirror": "Miroir",
+    "movableMirror": "Miroir mobile",
+    "fixedMirror": "Miroir fixe",
+    "screen": "Écran",
+    "unlimited": "illimitée"
+  },
+  "units": {
+    "nanometers": "{{value}} nm",
+    "micrometers": "{{value}} µm",
+    "millimeters": "{{value}} mm",
+    "picometers": "{{value}} pm",
+    "kilopascals": "{{value}} kPa",
+    "microradians": "{{value}} µrad",
+    "degrees": "{{value}}°",
+    "percent": "{{value}} %",
+    "perSecond": "{{value}}/s",
+    "plain": "{{value}}",
+    "waves": "{{value}} λ"
+  },
+  "michelson": {
+    "arm": "Miroir mobile",
+    "coarse": "Déplacement grossier",
+    "micrometer": "Micromètre",
+    "zeroTheArms": "Égaliser les bras",
+    "fringesCounted": "Franges comptées",
+    "resetCount": "Remettre le compteur à zéro",
+    "alignment": "Alignement",
+    "tiltHorizontal": "Incliner M₂ autour de l'axe vertical",
+    "tiltVertical": "Incliner M₂ autour de l'axe horizontal",
+    "compensatorPlate": "Lame compensatrice",
+    "gasCell": "Cuve à gaz",
+    "insertCell": "Insérer la cuve à gaz",
+    "pressure": "Pression",
+    "indexOfRefraction": "Indice de réfraction",
+    "fringesShifted": "Franges défilées"
+  },
+  "machZehnder": {
+    "pathImbalance": "Déséquilibre des bras",
+    "arms": "Bras",
+    "tilt": "Incliner M₂",
+    "sample": "Échantillon",
+    "insertSample": "Insérer la lame échantillon",
+    "thickness": "Épaisseur",
+    "index": "Indice de réfraction",
+    "slideTilt": "Inclinaison de la lame",
+    "addedPath": "Chemin optique ajouté",
+    "mode": "Mode",
+    "classical": "Faisceau continu",
+    "singlePhoton": "Un photon à la fois",
+    "photonRate": "Taux d'émission",
+    "whichPath": "Marquer le chemin suivi par le photon",
+    "clearCounts": "Effacer les comptages",
+    "portA": "Port A",
+    "portB": "Port B",
+    "counts": "Comptages",
+    "photonsEmitted": "Photons émis"
+  },
+  "fabryPerot": {
+    "cavity": "Cavité",
+    "reflectance": "Réflectance des miroirs",
+    "absorptance": "Absorption des miroirs",
+    "spacing": "Écartement des miroirs",
+    "scanCavity": "Balayer l'écartement",
+    "finesse": "Finesse",
+    "freeSpectralRange": "Intervalle spectral libre",
+    "resolvingPower": "Pouvoir de résolution",
+    "peakTransmission": "Transmission maximale",
+    "order": "Ordre au centre",
+    "sourceLines": "Source",
+    "twinLine": "Ajouter une seconde raie",
+    "lineSeparation": "Écart entre les raies",
+    "transmission": "Transmission",
+    "spectrum": "Spectre de transmission",
+    "resolved": "Les deux raies sont résolues",
+    "unresolved": "Les deux raies ne sont pas résolues"
   },
   "a11y": {
     "michelson": {
       "screenSummary": {
-        "playArea": "La zone de jeu affiche le contenu principal de la simulation.",
-        "controlArea": "La zone de contrôle comporte un bouton Tout réinitialiser qui ramène la simulation à son état initial.",
-        "interactionHint": "Explorez la simulation en interagissant avec ses commandes."
+        "playArea": "Un interféromètre de Michelson sur une table optique. Une séparatrice divise en deux la lumière de la source, l'envoie vers un miroir mobile et un miroir fixe, puis la recombine sur un écran détecteur où se forment les franges.",
+        "controlArea": "La zone de contrôle comporte le sélecteur de source lumineuse, les commandes grossière et micrométrique du miroir mobile, l'alignement des miroirs, une cuve à gaz et un bouton Tout réinitialiser qui ramène la simulation à son état initial.",
+        "interactionHint": "Change la position du miroir mobile pour faire défiler les franges, ou change de source pour voir comment la longueur de cohérence limite la différence de marche."
       },
-      "currentDetails": "La simulation est dans son état initial.",
+      "currentDetails": "La source est {{source}} à {{wavelength}}. La différence de marche est {{pathDifference}} et la visibilité des franges est {{visibility}}. La figure montre {{pattern}}.",
+      "patternRings": "des franges circulaires",
+      "patternStraight": "des franges rectilignes",
+      "patternUniform": "une seule frange qui remplit tout le champ",
+      "patternWashedOut": "aucune frange, seulement une lumière uniforme",
       "controls": {
-        "exampleControl": "Contrôle d'exemple"
+        "sourcePicker": "Source lumineuse",
+        "wavelength": "Longueur d'onde de la source",
+        "bandwidth": "Largeur spectrale de la source",
+        "coarse": "Déplacement grossier du miroir mobile",
+        "micrometer": "Micromètre du miroir mobile",
+        "zeroTheArms": "Égaliser les bras",
+        "resetCount": "Remettre le compteur de franges à zéro",
+        "tiltHorizontal": "Inclinaison du miroir fixe autour de l'axe vertical",
+        "tiltVertical": "Inclinaison du miroir fixe autour de l'axe horizontal",
+        "compensatorPlate": "Lame compensatrice dans le faisceau",
+        "insertCell": "Cuve à gaz dans le faisceau",
+        "pressure": "Pression de la cuve à gaz"
       }
     },
     "machZehnder": {
       "screenSummary": {
-        "playArea": "La zone de jeu affiche le contenu principal de la simulation.",
-        "controlArea": "La zone de contrôle comporte un bouton Tout réinitialiser qui ramène la simulation à son état initial.",
-        "interactionHint": "Explorez la simulation en interagissant avec ses commandes."
+        "playArea": "Un interféromètre de Mach-Zehnder. Une séparatrice envoie la lumière sur deux chemins distincts, deux miroirs les ramènent l'un vers l'autre et une seconde séparatrice les recombine en deux ports de sortie, chacun muni de son détecteur.",
+        "controlArea": "La zone de contrôle comporte le sélecteur de source lumineuse, les commandes de déséquilibre des bras et d'inclinaison des miroirs, une lame échantillon insérable, le choix entre faisceau continu et photons uniques, et un bouton Tout réinitialiser qui ramène la simulation à son état initial.",
+        "interactionHint": "Change le déséquilibre des bras et regarde la lumière passer d'un port à l'autre, ou incline un miroir pour étaler la figure en franges."
       },
-      "currentDetails": "La simulation est dans son état initial.",
+      "currentDetails": "La différence de marche est {{pathDifference}}. Le port A reçoit {{portA}} de la lumière et le port B en reçoit {{portB}}. {{modeDetail}}",
+      "classicalDetail": "Le faisceau est continu.",
+      "photonDetail": "{{emitted}} photons ont été émis ; {{countsA}} sont arrivés au port A et {{countsB}} au port B.",
+      "whichPathDetail": "Le marqueur de chemin est activé, donc les deux chemins n'interfèrent plus.",
       "controls": {
-        "exampleControl": "Contrôle d'exemple"
+        "sourcePicker": "Source lumineuse",
+        "wavelength": "Longueur d'onde de la source",
+        "bandwidth": "Largeur spectrale de la source",
+        "pathImbalance": "Déséquilibre des bras",
+        "tiltHorizontal": "Inclinaison du miroir autour de l'axe vertical",
+        "tiltVertical": "Inclinaison du miroir autour de l'axe horizontal",
+        "insertSample": "Lame échantillon dans le faisceau",
+        "thickness": "Épaisseur de l'échantillon",
+        "index": "Indice de réfraction de l'échantillon",
+        "slideTilt": "Inclinaison de la lame échantillon",
+        "mode": "Mode du faisceau",
+        "photonRate": "Taux d'émission des photons",
+        "whichPath": "Marqueur de chemin",
+        "clearCounts": "Effacer les comptages de photons"
       }
     },
     "fabryPerot": {
       "screenSummary": {
-        "playArea": "La zone de jeu affiche le contenu principal de la simulation.",
-        "controlArea": "La zone de contrôle comporte un bouton Tout réinitialiser qui ramène la simulation à son état initial.",
-        "interactionHint": "Explorez la simulation en interagissant avec ses commandes."
+        "playArea": "Un interféromètre de Fabry-Pérot. La lumière entre dans une cavité formée de deux miroirs partiellement réfléchissants et y fait de nombreux allers-retours avant d'en sortir, de sorte que de nombreux faisceaux interfèrent à la fois et que les anneaux transmis sont bien plus fins que des franges à deux ondes.",
+        "controlArea": "La zone de contrôle comporte la longueur d'onde de la source et une seconde raie facultative, la réflectance, l'absorption et l'écartement des miroirs de la cavité, et un bouton Tout réinitialiser qui ramène la simulation à son état initial.",
+        "interactionHint": "Augmente la réflectance des miroirs et regarde les anneaux larges se resserrer en pics fins."
       },
-      "currentDetails": "La simulation est dans son état initial.",
+      "currentDetails": "La réflectance des miroirs est {{reflectance}}, ce qui donne une finesse de {{finesse}}. L'écartement de la cavité est {{spacing}} et l'intervalle spectral libre est {{freeSpectralRange}}. {{resolutionDetail}}",
+      "resolvedDetail": "Les deux raies de la source sont résolues.",
+      "unresolvedDetail": "Les deux raies de la source ne sont pas résolues.",
+      "singleLineDetail": "La source ne comporte qu'une seule raie.",
       "controls": {
-        "exampleControl": "Contrôle d'exemple"
+        "wavelength": "Longueur d'onde de la source",
+        "twinLine": "Seconde raie de la source",
+        "lineSeparation": "Écart entre les deux raies de la source",
+        "reflectance": "Réflectance des miroirs",
+        "absorptance": "Absorption des miroirs",
+        "spacing": "Écartement des miroirs",
+        "scanCavity": "Balayer l'écartement des miroirs"
       }
     }
   },
   "preferences": {
     "title": "Simulation",
-    "exampleToggle": "Exemple de bascule"
+    "showOpticalPath": "Afficher les chemins optiques",
+    "showOpticalPathDescription": "Indiquer sur chaque tronçon de faisceau le chemin optique qu'il accumule."
   }
 }

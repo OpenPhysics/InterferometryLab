@@ -27,9 +27,9 @@ export class InterferometryLabPreferencesNode extends VBox {
       fill: InterferometryLabColors.controlSurfaceTextColorProperty,
     });
 
-    const exampleToggleCheckbox = new Checkbox(
-      preferencesModel.exampleToggleProperty,
-      new Text(prefStrings.exampleToggleStringProperty, {
+    const showOpticalPathCheckbox = new Checkbox(
+      preferencesModel.showOpticalPathProperty,
+      new Text(prefStrings.showOpticalPathStringProperty, {
         font: new PhetFont(14),
         fill: InterferometryLabColors.controlSurfaceTextColorProperty,
       }),
@@ -37,14 +37,15 @@ export class InterferometryLabPreferencesNode extends VBox {
         checkboxColor: InterferometryLabColors.controlSurfaceTextColorProperty,
         checkboxColorBackground: InterferometryLabColors.controlSurfaceColorProperty,
         spacing: 8,
-        ...(tandem && { tandem: tandem.createTandem("exampleToggleCheckbox") }),
+        accessibleHelpText: prefStrings.showOpticalPathDescriptionStringProperty,
+        ...(tandem && { tandem: tandem.createTandem("showOpticalPathCheckbox") }),
       },
     );
 
     super({
       align: "left",
       spacing: 12,
-      children: [header, exampleToggleCheckbox],
+      children: [header, showOpticalPathCheckbox],
     });
   }
 }

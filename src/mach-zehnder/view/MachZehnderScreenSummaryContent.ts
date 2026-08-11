@@ -1,38 +1,67 @@
 /**
  * MachZehnderScreenSummaryContent.ts
  *
- * The accessible screen summary read by screen readers (SceneryStack's
- * Interactive Description). It appears at the top of the parallel DOM and gives
- * a non-visual user a way to orient themselves and to re-read the simulation's
- * current state at any time.
+ * The accessible screen summary for the Mach-Zehnder screen.
  *
- * A summary has four regions (all optional, but provide at least the first
- * three in every sim for consistency across OpenPhysics):
- *   - playAreaContent       — what the play area contains
- *   - controlAreaContent    — what the controls do
- *   - currentDetailsContent — a LIVE paragraph describing current state
- *   - interactionHintContent — a short hint on how to get started
- *
- * ── Making "current details" live ─────────────────────────────────────────────
- * The template has no model state, so currentDetails is a static string. In a
- * real sim, build a DerivedProperty over the relevant model Properties and pass
- * it as `currentDetailsContent` so the paragraph updates as the sim runs.
- * See LunarLander/src/.../LunarLanderScreenSummaryContent.ts for the pattern.
+ * The live paragraph always reports *both* ports. A non-visual user cannot see
+ * the two detectors side by side, and the complementarity between them is the
+ * one thing this screen exists to show, so it has to be in the sentence rather
+ * than left to be inferred from a picture.
  */
+
+import { DerivedProperty } from "scenerystack/axon";
+import { StringUtils } from "scenerystack/phetcommon";
 import { ScreenSummaryContent } from "scenerystack/sim";
+import { countProperty, lengthProperty, percentProperty } from "../../common/view/formatters.js";
 import { StringManager } from "../../i18n/StringManager.js";
+import { BeamMode } from "../model/BeamMode.js";
 import type { MachZehnderModel } from "../model/MachZehnderModel.js";
 
 export class MachZehnderScreenSummaryContent extends ScreenSummaryContent {
-  // `model` is unused in the template but kept in the signature so real sims can
-  // derive a live currentDetailsContent from it without changing call sites.
-  public constructor(_model: MachZehnderModel) {
-    const a11y = StringManager.getInstance().getMachZehnderA11yStrings();
+  public constructor(model: MachZehnderModel) {
+    const strings = StringManager.getInstance();
+    const a11y = strings.getMachZehnderA11yStrings();
+
+    const photonDetailProperty = new DerivedProperty(
+      [
+        a11y.photonDetailStringProperty,
+        countProperty(model.photonsEmittedProperty),
+        countProperty(model.countsAProperty),
+        countProperty(model.countsBProperty),
+      ],
+      (pattern, emitted, countsA, countsB) => StringUtils.fillIn(pattern, { emitted, countsA, countsB }),
+    );
+
+    const modeDetailProperty = new DerivedProperty(
+      [
+        model.beamModeProperty,
+        model.whichPathProperty,
+        a11y.classicalDetailStringProperty,
+        photonDetailProperty,
+        a11y.whichPathDetailStringProperty,
+      ],
+      (mode, whichPath, classical, photon, whichPathDetail) => {
+        const base = mode === BeamMode.SINGLE_PHOTON ? photon : classical;
+        return whichPath ? `${base} ${whichPathDetail}` : base;
+      },
+    );
+
+    const currentDetailsProperty = new DerivedProperty(
+      [
+        a11y.currentDetailsStringProperty,
+        lengthProperty(model.pathDifferenceProperty, 0),
+        percentProperty(model.portAFractionProperty, 0),
+        percentProperty(model.portBFractionProperty, 0),
+        modeDetailProperty,
+      ],
+      (pattern, pathDifference, portA, portB, modeDetail) =>
+        StringUtils.fillIn(pattern, { pathDifference, portA, portB, modeDetail }),
+    );
 
     super({
       playAreaContent: a11y.screenSummary.playAreaStringProperty,
       controlAreaContent: a11y.screenSummary.controlAreaStringProperty,
-      currentDetailsContent: a11y.currentDetailsStringProperty,
+      currentDetailsContent: currentDetailsProperty,
       interactionHintContent: a11y.screenSummary.interactionHintStringProperty,
     });
   }

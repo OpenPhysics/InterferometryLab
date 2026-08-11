@@ -1,87 +1,112 @@
 /**
  * MichelsonScreenView.ts
  *
- * The top-level view for the simulation screen.
+ * Layout: the optical table and the detector across the top, the control panels
+ * in a row underneath.
  *
- * All visual nodes are added here. Follow these conventions:
- *   - Use this.layoutBounds for positioning (never magic pixel values)
- *   - Keep a ResetAllButton that calls model.reset() and this.reset()
- *   - Override step(dt) for frame-by-frame animation
- *
- * ── Adding content ────────────────────────────────────────────────────────────
- * 1. Create Node subclasses in separate files (e.g. InterferometryLabControlPanel.ts)
- * 2. Instantiate them here and call this.addChild(...)
- * 3. Link them to model properties:
- *      model.isRunningProperty.link( isRunning => { ... } );
- *
- * ── Layout bounds ─────────────────────────────────────────────────────────────
- * SceneryStack uses a virtual 1024×618 coordinate space by default.
- * this.layoutBounds gives you the full rectangle; use it for alignment:
- *   center, minX, maxX, minY, maxY, width, height
+ * The table and the detector sit side by side because they are two views of the
+ * same instant — the table shows what the student changed, the detector shows
+ * what it did to the light — and the whole point of the screen is the link
+ * between them.
  */
 
 import { type EmptySelfOptions, optionize } from "scenerystack/phet-core";
-import { Node, Rectangle, Text } from "scenerystack/scenery";
+import { HBox, Node, VBox } from "scenerystack/scenery";
 import { ResetAllButton } from "scenerystack/scenery-phet";
 import { ScreenView, type ScreenViewOptions } from "scenerystack/sim";
 import { FLAT_RESET_ALL_BUTTON_OPTIONS } from "../../common/InterferometryLabButtonOptions.js";
-import InterferometryLabColors from "../../InterferometryLabColors.js";
-import { SCREEN_VIEW_MARGIN } from "../../InterferometryLabConstants.js";
+import { DetectorScreenNode } from "../../common/view/DetectorScreenNode.js";
+import { lengthProperty, percentProperty } from "../../common/view/formatters.js";
+import { LightSourcePanel } from "../../common/view/LightSourcePanel.js";
+import { ReadoutBlock } from "../../common/view/ReadoutBlock.js";
+import {
+  CONTROL_PANEL_WIDTH,
+  DETECTOR_VIEW_SIZE,
+  PANEL_SPACING,
+  SCREEN_VIEW_MARGIN,
+} from "../../InterferometryLabConstants.js";
+import { StringManager } from "../../i18n/StringManager.js";
 import type { MichelsonModel } from "../model/MichelsonModel.js";
+import { MichelsonAlignmentPanel } from "./MichelsonAlignmentPanel.js";
+import { MichelsonGasCellPanel } from "./MichelsonGasCellPanel.js";
+import { MichelsonMirrorPanel } from "./MichelsonMirrorPanel.js";
 import { MichelsonScreenSummaryContent } from "./MichelsonScreenSummaryContent.js";
+import { MichelsonTableNode } from "./MichelsonTableNode.js";
 
 export type MichelsonScreenViewOptions = ScreenViewOptions;
 
+/** Width of each panel's content in the bottom row, view pixels. */
+const PANEL_CONTENT_WIDTH = CONTROL_PANEL_WIDTH - 24;
+
 export class MichelsonScreenView extends ScreenView {
   public constructor(model: MichelsonModel, providedOptions?: MichelsonScreenViewOptions) {
-    // ── Accessibility: screen summary ───────────────────────────────────────────
-    // The screen summary is the first thing a screen-reader user encounters. It
-    // is registered here, in the ScreenView's super() options, so every sim wires
-    // it the same way. See MichelsonScreenSummaryContent for the four content regions.
     const options = optionize<MichelsonScreenViewOptions, EmptySelfOptions, ScreenViewOptions>()(
-      {
-        screenSummaryContent: new MichelsonScreenSummaryContent(model),
-      },
+      { screenSummaryContent: new MichelsonScreenSummaryContent(model) },
       providedOptions,
     );
     super(options);
 
-    // ── Background ────────────────────────────────────────────────────────────
-    // A full-screen rectangle that follows the active color profile.
-    // Replace or remove once you add real content.
-    const backgroundRect = new Rectangle(0, 0, this.layoutBounds.width, this.layoutBounds.height, {
-      fill: InterferometryLabColors.backgroundColorProperty,
+    const strings = StringManager.getInstance();
+    const common = strings.getCommon();
+    const a11y = strings.getMichelsonA11yStrings().controls;
+
+    // Combo-box popups must be added above everything else, so they get their
+    // own layer created before the content that opens them.
+    const popupLayer = new Node();
+
+    // ── Top row: the table, and the detector it feeds ────────────────────────
+    const tableNode = new MichelsonTableNode(model);
+
+    const detectorNode = new DetectorScreenNode(model.fringeSpecProperty, {
+      size: DETECTOR_VIEW_SIZE,
+      title: common.detectorStringProperty,
     });
-    this.addChild(backgroundRect);
 
-    // ── Placeholder label ─────────────────────────────────────────────────────
-    // Replace this with your actual simulation content.
-    const placeholderText = new Text("Michelson", {
-      font: "bold 36px sans-serif",
-      fill: InterferometryLabColors.textColorProperty,
-      center: this.layoutBounds.center,
+    const detectorReadouts = new ReadoutBlock([
+      { label: common.pathDifferenceStringProperty, value: lengthProperty(model.pathDifferenceProperty, 1) },
+      { label: common.visibilityStringProperty, value: percentProperty(model.visibilityProperty, 0) },
+    ]);
+
+    // The readings sit bare under the detector rather than in a panel: they
+    // describe the image directly above them, and a panel border here would
+    // read as a second, separate control group.
+    const detectorColumn = new VBox({
+      spacing: PANEL_SPACING,
+      align: "center",
+      children: [detectorNode, detectorReadouts],
     });
-    this.addChild(placeholderText);
 
-    // ── Accessibility: per-control names ────────────────────────────────────────
-    // EVERY interactive node must carry an `accessibleName` (and an
-    // `accessibleHelpText` where useful), sourced from the StringManager `a11y`
-    // string group — never a hard-coded English literal. Sun/scenery-phet controls
-    // (NumberControl, Checkbox, ComboBox, AquaRadioButtonGroup, …) accept it as an
-    // option; a draggable plain Node needs `tagName: "div", focusable: true` too.
-    // Example (uncomment and adapt when you add a real control):
-    //
-    //   const a11y = StringManager.getInstance().getMichelsonA11yStrings();
-    //   const exampleButton = new RectangularPushButton({
-    //     ...FLAT_RECTANGULAR_BUTTON_OPTIONS, // flat appearance, not SceneryStack's default 3-D look
-    //     content: someIcon,
-    //     listener: () => model.doSomething(),
-    //     accessibleName: a11y.controls.exampleControlStringProperty,
-    //   });
-    //   this.addChild(exampleButton);
+    const topRow = new HBox({
+      spacing: PANEL_SPACING + 8,
+      align: "top",
+      children: [tableNode, detectorColumn],
+    });
+    topRow.left = this.layoutBounds.minX + SCREEN_VIEW_MARGIN;
+    topRow.top = this.layoutBounds.minY + SCREEN_VIEW_MARGIN;
 
-    // ── Reset All button ──────────────────────────────────────────────────────
-    // Always position at bottom-right (PhET convention).
+    // ── Bottom row: the controls ─────────────────────────────────────────────
+    const sourcePanel = new LightSourcePanel(model.lightSource, {
+      listParent: popupLayer,
+      accessibleNames: {
+        sourcePicker: a11y.sourcePickerStringProperty,
+        wavelength: a11y.wavelengthStringProperty,
+        bandwidth: a11y.bandwidthStringProperty,
+      },
+      contentWidth: PANEL_CONTENT_WIDTH,
+    });
+
+    const mirrorPanel = new MichelsonMirrorPanel(model, PANEL_CONTENT_WIDTH);
+    const alignmentPanel = new MichelsonAlignmentPanel(model, PANEL_CONTENT_WIDTH);
+    const gasCellPanel = new MichelsonGasCellPanel(model, PANEL_CONTENT_WIDTH);
+
+    const controlRow = new HBox({
+      spacing: PANEL_SPACING,
+      align: "top",
+      children: [sourcePanel, mirrorPanel, alignmentPanel, gasCellPanel],
+    });
+    controlRow.left = this.layoutBounds.minX + SCREEN_VIEW_MARGIN;
+    controlRow.top = topRow.bottom + PANEL_SPACING;
+
     const resetAllButton = new ResetAllButton({
       ...FLAT_RESET_ALL_BUTTON_OPTIONS,
       listener: () => {
@@ -91,37 +116,24 @@ export class MichelsonScreenView extends ScreenView {
       right: this.layoutBounds.maxX - SCREEN_VIEW_MARGIN,
       bottom: this.layoutBounds.maxY - SCREEN_VIEW_MARGIN,
     });
-    this.addChild(resetAllButton);
 
-    // ── Accessibility: keyboard / reading traversal order ───────────────────────
-    // Make the parallel DOM (Tab order and screen-reader reading order)
-    // deterministic and independent of child z-order. ScreenView throws if you
-    // set pdomOrder on itself, so add a lightweight wrapper Node that "borrows"
-    // the interactive nodes in the order a user should reach them — Reset All
-    // last. Non-interactive decoration (background, placeholder) is omitted.
+    this.children = [topRow, controlRow, resetAllButton, popupLayer];
+
+    // ── Traversal order ──────────────────────────────────────────────────────
+    // Source first (it sets what everything else acts on), then the mirror that
+    // drives the fringes, then alignment and the cell, then Reset All.
     this.addChild(
       new Node({
-        pdomOrder: [
-          // TODO: add the sim's interactive nodes here, in traversal order
-          resetAllButton,
-        ],
+        pdomOrder: [sourcePanel, mirrorPanel, alignmentPanel, gasCellPanel, resetAllButton],
       }),
     );
   }
 
-  /**
-   * Resets view-side state (animations, panel visibility, etc.).
-   * Called by the Reset All button listener.
-   */
   public reset(): void {
-    // TODO: reset any view-side state here
+    // All state lives in the model; there is no view-side state to restore.
   }
 
-  /**
-   * Steps the view forward by dt seconds for animation.
-   * @param _dt - elapsed time in seconds
-   */
   public override step(_dt: number): void {
-    // TODO: implement animation updates here
+    // The pattern repaints when the model changes, not on a clock.
   }
 }
