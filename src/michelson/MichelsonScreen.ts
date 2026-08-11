@@ -15,6 +15,7 @@ import { Screen } from "scenerystack/sim";
 import type { Tandem } from "scenerystack/tandem";
 import { createMichelsonIcon } from "../common/InterferometryLabScreenIcons.js";
 import InterferometryLabColors from "../InterferometryLabColors.js";
+import type { InterferometryLabPreferencesModel } from "../preferences/InterferometryLabPreferencesModel.js";
 import { MichelsonModel } from "./model/MichelsonModel.js";
 import { MichelsonKeyboardHelpContent } from "./view/MichelsonKeyboardHelpContent.js";
 import { MichelsonScreenView } from "./view/MichelsonScreenView.js";
@@ -23,13 +24,18 @@ import { MichelsonScreenView } from "./view/MichelsonScreenView.js";
 type MichelsonScreenOptions = ScreenOptions & { tandem: Tandem };
 
 export class MichelsonScreen extends Screen<MichelsonModel, MichelsonScreenView> {
-  public constructor(options: MichelsonScreenOptions) {
+  /**
+   * @param preferences - simulation preferences the view reads; the optical-path
+   *                      labels are a preference, so the view needs to see them
+   * @param options
+   */
+  public constructor(preferences: InterferometryLabPreferencesModel, options: MichelsonScreenOptions) {
     super(
       // Model factory — called once when the screen is first shown
       () => new MichelsonModel(),
       // View factory — receives the model instance
       (model) =>
-        new MichelsonScreenView(model, {
+        new MichelsonScreenView(model, preferences, {
           tandem: options.tandem.createTandem("view"),
         }),
       optionize<MichelsonScreenOptions, EmptySelfOptions, ScreenOptions>()(

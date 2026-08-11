@@ -15,6 +15,7 @@ import { DerivedProperty, type TReadOnlyProperty } from "scenerystack/axon";
 import { Vector2 } from "scenerystack/dot";
 import { Node } from "scenerystack/scenery";
 import { BeamPathNode } from "../../common/view/BeamPathNode.js";
+import { pathDeltaProperty } from "../../common/view/formatters.js";
 import { OpticalTableNode } from "../../common/view/OpticalTableNode.js";
 import {
   createBeamSplitterNode,
@@ -28,6 +29,7 @@ import {
 import { sourceColorProperty } from "../../common/view/sourceColor.js";
 import { MICHELSON_COARSE_RANGE_NM } from "../../InterferometryLabConstants.js";
 import { StringManager } from "../../i18n/StringManager.js";
+import type { InterferometryLabPreferencesModel } from "../../preferences/InterferometryLabPreferencesModel.js";
 import type { MichelsonModel } from "../model/MichelsonModel.js";
 
 /** Table size, view pixels. */
@@ -53,7 +55,7 @@ const OPTIC_WIDTH = 46;
 const MIRROR_TRAVEL_PIXELS = 14;
 
 export class MichelsonTableNode extends Node {
-  public constructor(model: MichelsonModel) {
+  public constructor(model: MichelsonModel, preferences: InterferometryLabPreferencesModel) {
     super();
 
     const strings = StringManager.getInstance();
@@ -145,6 +147,28 @@ export class MichelsonTableNode extends Node {
     gasCellLabel.centerY = GAS_CELL.y;
     gasCellLabel.visibleProperty = model.gasCellEnabledProperty;
 
+    // ── Path-difference contributions ────────────────────────────────────────
+    // Optional, because the numbers are already in the readouts and a permanent
+    // second copy on the table would be clutter. Switched on they answer the
+    // question the readouts cannot: *where* the path difference is coming from.
+    // Both are doubled, because both are in an arm the light crosses twice —
+    // which is the single most common slip in reading a Michelson, and drawing
+    // it next to the element makes the factor of two hard to miss.
+    const mirrorPathLabel = createTableLabel(pathDeltaProperty(model.mirrorPathProperty, 1));
+    mirrorPathLabel.left = MOVABLE_MIRROR.x + 30;
+    mirrorPathLabel.centerY = MOVABLE_MIRROR.y;
+    mirrorPathLabel.visibleProperty = preferences.showOpticalPathProperty;
+
+    // Left of the cell rather than under it: below is where the compensator's
+    // own label runs, and the two would collide.
+    const cellPathLabel = createTableLabel(pathDeltaProperty(model.gasCellOpdProperty, 2));
+    cellPathLabel.right = GAS_CELL.x - 24;
+    cellPathLabel.centerY = GAS_CELL.y;
+    cellPathLabel.visibleProperty = new DerivedProperty(
+      [preferences.showOpticalPathProperty, model.gasCellEnabledProperty],
+      (show, enabled) => show && enabled,
+    );
+
     this.children = [
       table,
       beams,
@@ -162,6 +186,8 @@ export class MichelsonTableNode extends Node {
       detectorLabel,
       compensatorLabel,
       gasCellLabel,
+      mirrorPathLabel,
+      cellPathLabel,
     ];
   }
 }

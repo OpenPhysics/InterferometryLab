@@ -41,6 +41,9 @@ branches to the renderer.
 | `src/common/model/refractiveIndex.ts` | Gladstone-Dale gases, N-BK7 Sellmeier, tilted plates |
 | `src/common/model/LightSourceModel.ts` | Source selection → spectral groups |
 | `src/common/view/FringePatternNode.ts` | The renderer (CanvasNode) |
+| `src/common/view/IntensityProfileNode.ts` | Bamboo chart of intensity across a cut through the detector |
+| `src/michelson/view/CoherenceEnvelopeNode.ts` | Bamboo chart of visibility vs path difference |
+| `src/common/TimeModel.ts` | Play/pause clock composed into the Mach-Zehnder and Fabry-Pérot models |
 | `src/common/view/spectralColor.ts` | CIE XYZ colour pipeline — see the carve-out below |
 | `src/common/view/InterferometryLabNumberControl.ts` | Themed slider; requires an accessible name and explicit keyboard steps |
 | `src/{michelson,mach-zehnder,fabry-perot}/` | One folder per screen, `model/` + `view/` |
@@ -61,6 +64,13 @@ branches to the renderer.
 - **Zero path difference with parallel mirrors shows a single flat tone, not fringes.** That is
   correct. `opdSpread()` exists so the a11y description says so rather than claiming rings.
 - **Fringe counts are derived from a reference, never accumulated**, so they cannot drift.
+- **A chart node must dispose every Property it created**, not just its `Multilink`. The
+  formatter Properties behind an `accessibleParagraph` each link a model Property of their own, so
+  leaving them alive keeps the node reachable from a model that outlives it. `tests/memory-leak.test.ts`
+  catches this; it caught it once already.
+- **The analysis charts pad their value axis** past what the physics can reach, because the traces
+  that matter most are flat ones (a dark port at 0, a constant total at 1, a laser's visibility at
+  1). Against the frame those look like an empty chart.
 
 ## Accessibility
 
@@ -90,15 +100,15 @@ micrometer, mirror tilt) only reach their useful precision via shift-arrow.
 
 ## Testing
 
-124 vitest specs; `happy-dom`, template `tests/setup.ts`.
+138 vitest specs; `happy-dom`, template `tests/setup.ts`.
 
 | Path | Covers |
 |---|---|
 | `tests/spectrum.test.ts` | coherence, visibility envelopes, doublet beats, line splitting |
-| `tests/fringeIntensity.test.ts` | detector geometry, two-beam and Airy intensity, finesse |
+| `tests/fringeIntensity.test.ts` | detector geometry, two-beam and Airy intensity, finesse, `intensityProfile` |
 | `tests/refractiveIndex.test.ts` | Sellmeier vs published indices, Gladstone-Dale, tilted plates |
 | `tests/interferometerModels.test.ts` | all three models: derived values, controls, reset |
-| `tests/memory-leak.test.ts` | dispose/WeakRef, extended to `FringePatternNode` + `PhotonMarksNode` |
+| `tests/memory-leak.test.ts` | dispose/WeakRef, extended to the four nodes that link model Properties |
 
 Several assertions are anchored to **published** values (N-BK7 at 632.8 nm and 587.6 nm, its Abbe
 number, air's refractivity) rather than to the implementation, so a wrong constant fails instead

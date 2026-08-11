@@ -14,6 +14,7 @@ import { DerivedProperty } from "scenerystack/axon";
 import { Vector2 } from "scenerystack/dot";
 import { Node } from "scenerystack/scenery";
 import { BeamPathNode } from "../../common/view/BeamPathNode.js";
+import { pathDeltaProperty } from "../../common/view/formatters.js";
 import { OpticalTableNode } from "../../common/view/OpticalTableNode.js";
 import {
   createDetectorPlateNode,
@@ -24,6 +25,7 @@ import {
 } from "../../common/view/opticNodes.js";
 import { sourceColorProperty } from "../../common/view/sourceColor.js";
 import { StringManager } from "../../i18n/StringManager.js";
+import type { InterferometryLabPreferencesModel } from "../../preferences/InterferometryLabPreferencesModel.js";
 import type { FabryPerotModel } from "../model/FabryPerotModel.js";
 
 /** Table size, view pixels. */
@@ -48,7 +50,7 @@ const DRAWN_BOUNCES = 4;
 const BOUNCE_STEP = 9;
 
 export class FabryPerotTableNode extends Node {
-  public constructor(model: FabryPerotModel) {
+  public constructor(model: FabryPerotModel, preferences: InterferometryLabPreferencesModel) {
     super();
 
     const strings = StringManager.getInstance();
@@ -115,6 +117,14 @@ export class FabryPerotTableNode extends Node {
     cavityLabel.centerX = (FIRST_MIRROR_X + SECOND_MIRROR_X) / 2;
     cavityLabel.top = AXIS_Y + 44;
 
+    // The cavity's contribution is the round trip 2nd, not the spacing d — which
+    // is exactly the distinction the order m = 2nd/λ readout depends on, and the
+    // one that is easiest to lose when reading the spacing slider.
+    const cavityPathLabel = createTableLabel(pathDeltaProperty(model.roundTripPathProperty, 1));
+    cavityPathLabel.centerX = (FIRST_MIRROR_X + SECOND_MIRROR_X) / 2;
+    cavityPathLabel.top = AXIS_Y + 60;
+    cavityPathLabel.visibleProperty = preferences.showOpticalPathProperty;
+
     const screenLabel = createTableLabel(common.screenStringProperty);
     screenLabel.centerX = SCREEN_X - 6;
     screenLabel.top = AXIS_Y + 44;
@@ -129,6 +139,7 @@ export class FabryPerotTableNode extends Node {
       screen,
       sourceLabel,
       cavityLabel,
+      cavityPathLabel,
       screenLabel,
     ];
   }

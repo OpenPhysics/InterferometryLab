@@ -17,12 +17,16 @@ import { HBox, Node, VBox } from "scenerystack/scenery";
 import { ResetAllButton } from "scenerystack/scenery-phet";
 import { ScreenView, type ScreenViewOptions } from "scenerystack/sim";
 import { FLAT_RESET_ALL_BUTTON_OPTIONS } from "../../common/InterferometryLabButtonOptions.js";
+import { createTimeControl } from "../../common/view/controlFactory.js";
 import { DetectorScreenNode } from "../../common/view/DetectorScreenNode.js";
-import { lengthProperty, percentProperty } from "../../common/view/formatters.js";
+import { lengthProperty, percentProperty, wavesProperty } from "../../common/view/formatters.js";
+import { IntensityProfileNode } from "../../common/view/IntensityProfileNode.js";
 import { LightSourcePanel } from "../../common/view/LightSourcePanel.js";
 import { ReadoutBlock } from "../../common/view/ReadoutBlock.js";
+import InterferometryLabColors from "../../InterferometryLabColors.js";
 import { CONTROL_PANEL_WIDTH, PANEL_SPACING, SCREEN_VIEW_MARGIN } from "../../InterferometryLabConstants.js";
 import { StringManager } from "../../i18n/StringManager.js";
+import type { InterferometryLabPreferencesModel } from "../../preferences/InterferometryLabPreferencesModel.js";
 import { BeamMode } from "../model/BeamMode.js";
 import type { MachZehnderModel } from "../model/MachZehnderModel.js";
 import { MachZehnderArmsPanel } from "./MachZehnderArmsPanel.js";
@@ -38,11 +42,20 @@ export type MachZehnderScreenViewOptions = ScreenViewOptions;
 const PANEL_CONTENT_WIDTH = CONTROL_PANEL_WIDTH - 24;
 
 /** Side length of each of the two port detectors, view pixels. Smaller than the
- *  single detector on the other screens, because there are two of them. */
-const PORT_DETECTOR_SIZE = 168;
+ *  single detector on the other screens, because there are two of them and they
+ *  share the column with the trace drawn underneath. */
+const PORT_DETECTOR_SIZE = 132;
+
+/** The intensity trace under the two ports, view pixels. Spans both of them. */
+const PROFILE_WIDTH = 2 * PORT_DETECTOR_SIZE + PANEL_SPACING;
+const PROFILE_HEIGHT = 68;
 
 export class MachZehnderScreenView extends ScreenView {
-  public constructor(model: MachZehnderModel, providedOptions?: MachZehnderScreenViewOptions) {
+  public constructor(
+    model: MachZehnderModel,
+    preferences: InterferometryLabPreferencesModel,
+    providedOptions?: MachZehnderScreenViewOptions,
+  ) {
     const options = optionize<MachZehnderScreenViewOptions, EmptySelfOptions, ScreenViewOptions>()(
       { screenSummaryContent: new MachZehnderScreenSummaryContent(model) },
       providedOptions,
@@ -62,7 +75,7 @@ export class MachZehnderScreenView extends ScreenView {
       (mode) => mode === BeamMode.SINGLE_PHOTON,
     );
 
-    const tableNode = new MachZehnderTableNode(model);
+    const tableNode = new MachZehnderTableNode(model, preferences);
 
     /**
      * One port: the pattern, the accumulated photon marks over it, and the share
@@ -106,12 +119,65 @@ export class MachZehnderScreenView extends ScreenView {
 
     const pathReadout = new ReadoutBlock([
       { label: common.pathDifferenceStringProperty, value: lengthProperty(model.pathDifferenceProperty, 0) },
+      {
+        label: common.inWavelengthsStringProperty,
+        value: wavesProperty(model.pathDifferenceProperty, model.lightSource.meanWavelengthProperty, 2),
+      },
+      { label: common.visibilityStringProperty, value: percentProperty(model.visibilityProperty, 0) },
     ]);
 
+    // The screen's whole argument, drawn: two traces exactly out of step and a
+    // flat dashed total. Two images and two percentages can only ever suggest
+    // that the ports are complementary; here it is a straight line you can look
+    // at, and it stays straight when the which-path marker collapses both traces
+    // to a flat half.
+    const profileNode = new IntensityProfileNode(
+      [
+        {
+          specProperty: model.portASpecProperty,
+          colorProperty: InterferometryLabColors.plotTraceColorProperty,
+          label: machZehnder.portAStringProperty,
+        },
+        {
+          specProperty: model.portBSpecProperty,
+          colorProperty: InterferometryLabColors.plotTraceAltColorProperty,
+          label: machZehnder.portBStringProperty,
+        },
+      ],
+      {
+        width: PROFILE_WIDTH,
+        height: PROFILE_HEIGHT,
+        showSum: true,
+        sumLabel: machZehnder.sumOfPortsStringProperty,
+        descriptionSuffix: strings.getMachZehnderA11yStrings().profileComplementaryStringProperty,
+      },
+    );
+
+    // Only meaningful in single-photon mode: the continuous beam has nothing
+    // that evolves, so a play button there would suggest motion that is not
+    // there.
+    const timeControl = createTimeControl(
+      model.timer.isPlayingProperty,
+      () => model.stepOnce(),
+      a11y.modeStringProperty,
+    );
+    timeControl.visibleProperty = isSinglePhotonProperty;
+
+    // The readings and the clock sit beside the trace rather than under it. The
+    // column is already four items deep — two detectors, a trace, and the
+    // numbers — and stacking them all would push the control panels off the
+    // bottom of the screen.
     const detectorColumn = new VBox({
       spacing: 8,
-      align: "center",
-      children: [new HBox({ spacing: PANEL_SPACING, align: "top", children: [portA, portB] }), pathReadout],
+      align: "left",
+      children: [
+        new HBox({ spacing: PANEL_SPACING, align: "top", children: [portA, portB] }),
+        new HBox({
+          spacing: PANEL_SPACING + 10,
+          align: "top",
+          children: [profileNode, new VBox({ spacing: 10, align: "left", children: [pathReadout, timeControl] })],
+        }),
+      ],
     });
 
     const topRow = new HBox({
@@ -158,7 +224,9 @@ export class MachZehnderScreenView extends ScreenView {
 
     this.addChild(
       new Node({
-        pdomOrder: [sourcePanel, armsPanel, samplePanel, modePanel, resetAllButton],
+        // The time control comes after the mode panel that reveals it: it is
+        // only meaningful once single-photon mode is chosen.
+        pdomOrder: [sourcePanel, armsPanel, samplePanel, modePanel, timeControl, resetAllButton],
       }),
     );
   }

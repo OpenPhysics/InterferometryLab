@@ -36,17 +36,17 @@ onReadyToLaunch(() => {
   const simPreferences = new InterferometryLabPreferencesModel(Tandem.ROOT.createTandem("preferences"));
 
   const screens = [
-    new MichelsonScreen({
+    new MichelsonScreen(simPreferences, {
       name: stringManager.getScreenNames().michelsonStringProperty,
       tandem: Tandem.ROOT.createTandem("michelsonScreen"),
       backgroundColorProperty: InterferometryLabColors.backgroundColorProperty,
     }),
-    new MachZehnderScreen({
+    new MachZehnderScreen(simPreferences, {
       name: stringManager.getScreenNames().machZehnderStringProperty,
       tandem: Tandem.ROOT.createTandem("machZehnderScreen"),
       backgroundColorProperty: InterferometryLabColors.backgroundColorProperty,
     }),
-    new FabryPerotScreen({
+    new FabryPerotScreen(simPreferences, {
       name: stringManager.getScreenNames().fabryPerotStringProperty,
       tandem: Tandem.ROOT.createTandem("fabryPerotScreen"),
       backgroundColorProperty: InterferometryLabColors.backgroundColorProperty,

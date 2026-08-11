@@ -14,18 +14,25 @@ produce rather than drawing a picture of one.
 
 - **Michelson** — coarse and micrometer mirror travel, mirror tilt to drive circular fringes into
   straight ones, an evacuable gas cell for the classic index-of-refraction measurement, a
-  compensator plate, and a fringe counter
+  compensator plate, a fringe counter, an intensity trace across the detector, and a visibility
+  curve that shows the coherence envelope — flat for a laser, a needle for white light, and the
+  sodium doublet's nulls and revivals
 - **Mach-Zehnder** — both complementary output ports shown at once, an insertable sample slide
   with adjustable thickness, index and tilt, and a single-photon mode that builds the pattern one
-  detection at a time, with a which-path marker that erases it
+  detection at a time (pausable and steppable), with a which-path marker that erases it — and a
+  trace of both ports whose dashed total stays flat, so interference visibly moves light rather
+  than destroying it
 - **Fabry-Pérot** — mirror reflectance from 0.04 to 0.99, absorption, cavity spacing and a
-  scanning mode, with live finesse, free spectral range and resolving power, plus a transmission
-  spectrum showing whether two lines are resolved
+  scanning mode you can pause and step onto a transmission peak, with live finesse, free spectral
+  range and resolving power, plus a transmission spectrum showing whether two lines are resolved
 - **Six light sources** from a helium-neon laser to white light, spanning 200 mm to 1 µm of
   coherence length — including the sodium doublet and its visibility beats
 - Physically computed colour: white-light fringes come out with the correct achromatic centre and
   coloured orders, summed in linear light through CIE XYZ
-- Full keyboard access and live screen-reader descriptions of the pattern
+- An optional Preferences overlay labelling each optical element with what it contributes to the
+  optical path difference — including the factor of two a Michelson arm carries and a
+  Mach-Zehnder's does not
+- Full keyboard access and live screen-reader descriptions of the pattern and of both charts
 - English, Spanish, and French localization via `StringManager`
 - Default and projector color profiles
 - Progressive Web App (installable, offline-capable)

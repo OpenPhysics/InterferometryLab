@@ -9,13 +9,17 @@
  * review checklist.
  */
 
-import type { PhetioProperty, TReadOnlyProperty } from "scenerystack/axon";
+import type { PhetioProperty, Property, TReadOnlyProperty } from "scenerystack/axon";
 import { Text } from "scenerystack/scenery";
-import { PhetFont } from "scenerystack/scenery-phet";
+import { PhetFont, TimeControlNode } from "scenerystack/scenery-phet";
 import { Checkbox, RectangularPushButton } from "scenerystack/sun";
 import InterferometryLabColors from "../../InterferometryLabColors.js";
 import { LABEL_FONT_SIZE } from "../../InterferometryLabConstants.js";
-import { FLAT_RECTANGULAR_BUTTON_OPTIONS, LIGHT_SURFACE_TEXT_FILL } from "../InterferometryLabButtonOptions.js";
+import {
+  FLAT_PLAY_PAUSE_STEP_BUTTON_OPTIONS,
+  FLAT_RECTANGULAR_BUTTON_OPTIONS,
+  LIGHT_SURFACE_TEXT_FILL,
+} from "../InterferometryLabButtonOptions.js";
 
 /**
  * A checkbox with a text label, themed for the sim's panels.
@@ -73,5 +77,40 @@ export function createPushButton(
     accessibleName,
     xMargin: 10,
     yMargin: 5,
+  });
+}
+
+/**
+ * Play / pause with a step-forward button, themed flat like the rest of the sim.
+ *
+ * Both of the sim's time-evolving screens want the same thing: the ability to
+ * stop what the clock is doing and then advance it in single frames — one
+ * frame's worth of photons, or one three-hundredth of a cavity sweep. Neither
+ * screen wants a speed selector, because the step button already gives finer
+ * control than a slow speed would.
+ *
+ * `TimeControlNode` supplies its own accessible heading; `accessibleHeading`
+ * here replaces the generic "Time Controls" with what this particular clock
+ * drives.
+ *
+ * @param isPlayingProperty - the clock's run state
+ * @param stepOnce - advances the model by one frame while paused
+ * @param accessibleHeading - names what the clock controls, for a screen reader
+ */
+export function createTimeControl(
+  isPlayingProperty: Property<boolean>,
+  stepOnce: () => void,
+  accessibleHeading: TReadOnlyProperty<string>,
+): TimeControlNode {
+  return new TimeControlNode(isPlayingProperty, {
+    accessibleHeading,
+    playPauseStepButtonOptions: {
+      ...FLAT_PLAY_PAUSE_STEP_BUTTON_OPTIONS,
+      includeStepForwardButton: true,
+      stepForwardButtonOptions: {
+        ...FLAT_PLAY_PAUSE_STEP_BUTTON_OPTIONS.stepForwardButtonOptions,
+        listener: stepOnce,
+      },
+    },
   });
 }

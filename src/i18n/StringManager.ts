@@ -113,6 +113,11 @@ export class StringManager {
     return stringProperties.fabryPerot;
   }
 
+  /** Accessibility strings for view components shared by more than one screen. */
+  public getCommonA11yStrings() {
+    return stringProperties.a11y.common;
+  }
+
   /** Accessibility strings for the Michelson screen. */
   public getMichelsonA11yStrings() {
     return stringProperties.a11y.michelson;

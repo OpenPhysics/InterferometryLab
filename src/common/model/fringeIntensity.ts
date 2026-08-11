@@ -189,6 +189,34 @@ export function axialIntensity(spec: FringeSpec): number {
   return intensityAt(spec, 0, 0, scratch);
 }
 
+/**
+ * Intensity along a horizontal cut through the centre of the detector: `v = 0`,
+ * `u` running −1 to +1, sampled at pixel centres the same way the renderer
+ * samples its grid.
+ *
+ * This is the trace a slit detector scanned across the pattern would record, and
+ * it is what turns the image into a measurement — the depth of the modulation
+ * *is* the visibility, and the number of ripples *is* the fringe count. It lives
+ * here rather than in the plotting node so that it stays a pure function of a
+ * {@link FringeSpec}, testable without a canvas, like the rest of the physics.
+ *
+ * @param spec - the pattern description
+ * @param sampleCount - number of points across the detector
+ * @param out - optional buffer of at least `sampleCount` entries to fill
+ * @returns the filled buffer
+ */
+export function intensityProfile(spec: FringeSpec, sampleCount: number, out?: Float64Array): Float64Array {
+  const result = out && out.length >= sampleCount ? out : new Float64Array(sampleCount);
+  const scratch = new Float64Array(spec.groups.length);
+
+  for (let i = 0; i < sampleCount; i++) {
+    const u = (2 * (i + 0.5)) / sampleCount - 1;
+    result[i] = intensityAt(spec, u, 0, scratch);
+  }
+
+  return result;
+}
+
 InterferometryLabNamespace.register("fringeIntensity", {
   axialCosine,
   opticalPathDifference,
@@ -200,4 +228,5 @@ InterferometryLabNamespace.register("fringeIntensity", {
   airyIntensity,
   intensityAt,
   axialIntensity,
+  intensityProfile,
 });

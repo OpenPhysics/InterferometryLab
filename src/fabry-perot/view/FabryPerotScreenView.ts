@@ -21,6 +21,7 @@ import { ReadoutBlock } from "../../common/view/ReadoutBlock.js";
 import { TitledPanel } from "../../common/view/TitledPanel.js";
 import { CONTROL_PANEL_WIDTH, PANEL_SPACING, SCREEN_VIEW_MARGIN } from "../../InterferometryLabConstants.js";
 import { StringManager } from "../../i18n/StringManager.js";
+import type { InterferometryLabPreferencesModel } from "../../preferences/InterferometryLabPreferencesModel.js";
 import type { FabryPerotModel } from "../model/FabryPerotModel.js";
 import { FabryPerotCavityPanel } from "./FabryPerotCavityPanel.js";
 import { FabryPerotScreenSummaryContent } from "./FabryPerotScreenSummaryContent.js";
@@ -41,7 +42,11 @@ const PLOT_WIDTH = 370;
 const PLOT_HEIGHT = 196;
 
 export class FabryPerotScreenView extends ScreenView {
-  public constructor(model: FabryPerotModel, providedOptions?: FabryPerotScreenViewOptions) {
+  public constructor(
+    model: FabryPerotModel,
+    preferences: InterferometryLabPreferencesModel,
+    providedOptions?: FabryPerotScreenViewOptions,
+  ) {
     const options = optionize<FabryPerotScreenViewOptions, EmptySelfOptions, ScreenViewOptions>()(
       { screenSummaryContent: new FabryPerotScreenSummaryContent(model) },
       providedOptions,
@@ -53,7 +58,7 @@ export class FabryPerotScreenView extends ScreenView {
     const fabryPerot = strings.getFabryPerotStrings();
     const units = strings.getUnits();
 
-    const tableNode = new FabryPerotTableNode(model);
+    const tableNode = new FabryPerotTableNode(model, preferences);
 
     const detectorNode = new DetectorScreenNode(model.fringeSpecProperty, {
       size: RING_SIZE,

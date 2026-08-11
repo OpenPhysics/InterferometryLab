@@ -16,9 +16,11 @@ import { ResetAllButton } from "scenerystack/scenery-phet";
 import { ScreenView, type ScreenViewOptions } from "scenerystack/sim";
 import { FLAT_RESET_ALL_BUTTON_OPTIONS } from "../../common/InterferometryLabButtonOptions.js";
 import { DetectorScreenNode } from "../../common/view/DetectorScreenNode.js";
-import { lengthProperty, percentProperty } from "../../common/view/formatters.js";
+import { lengthProperty, percentProperty, wavesProperty } from "../../common/view/formatters.js";
+import { IntensityProfileNode } from "../../common/view/IntensityProfileNode.js";
 import { LightSourcePanel } from "../../common/view/LightSourcePanel.js";
 import { ReadoutBlock } from "../../common/view/ReadoutBlock.js";
+import { sourceColorProperty } from "../../common/view/sourceColor.js";
 import {
   CONTROL_PANEL_WIDTH,
   DETECTOR_VIEW_SIZE,
@@ -26,7 +28,9 @@ import {
   SCREEN_VIEW_MARGIN,
 } from "../../InterferometryLabConstants.js";
 import { StringManager } from "../../i18n/StringManager.js";
+import type { InterferometryLabPreferencesModel } from "../../preferences/InterferometryLabPreferencesModel.js";
 import type { MichelsonModel } from "../model/MichelsonModel.js";
+import { CoherenceEnvelopeNode } from "./CoherenceEnvelopeNode.js";
 import { MichelsonAlignmentPanel } from "./MichelsonAlignmentPanel.js";
 import { MichelsonGasCellPanel } from "./MichelsonGasCellPanel.js";
 import { MichelsonMirrorPanel } from "./MichelsonMirrorPanel.js";
@@ -38,8 +42,16 @@ export type MichelsonScreenViewOptions = ScreenViewOptions;
 /** Width of each panel's content in the bottom row, view pixels. */
 const PANEL_CONTENT_WIDTH = CONTROL_PANEL_WIDTH - 24;
 
+/** The analysis column to the right of the detector, view pixels. */
+const PLOT_WIDTH = 264;
+const PLOT_HEIGHT = 104;
+
 export class MichelsonScreenView extends ScreenView {
-  public constructor(model: MichelsonModel, providedOptions?: MichelsonScreenViewOptions) {
+  public constructor(
+    model: MichelsonModel,
+    preferences: InterferometryLabPreferencesModel,
+    providedOptions?: MichelsonScreenViewOptions,
+  ) {
     const options = optionize<MichelsonScreenViewOptions, EmptySelfOptions, ScreenViewOptions>()(
       { screenSummaryContent: new MichelsonScreenSummaryContent(model) },
       providedOptions,
@@ -55,15 +67,23 @@ export class MichelsonScreenView extends ScreenView {
     const popupLayer = new Node();
 
     // ── Top row: the table, and the detector it feeds ────────────────────────
-    const tableNode = new MichelsonTableNode(model);
+    const tableNode = new MichelsonTableNode(model, preferences);
 
     const detectorNode = new DetectorScreenNode(model.fringeSpecProperty, {
       size: DETECTOR_VIEW_SIZE,
       title: common.detectorStringProperty,
     });
 
+    // The same path difference twice, in the two units it means something in: a
+    // length, which is what the stage moved, and a number of wavelengths, which
+    // is how many fringes went past. Students routinely convert between them
+    // wrongly, and the pair sitting together is the cheapest possible fix.
     const detectorReadouts = new ReadoutBlock([
       { label: common.pathDifferenceStringProperty, value: lengthProperty(model.pathDifferenceProperty, 1) },
+      {
+        label: common.inWavelengthsStringProperty,
+        value: wavesProperty(model.pathDifferenceProperty, model.lightSource.meanWavelengthProperty, 1),
+      },
       { label: common.visibilityStringProperty, value: percentProperty(model.visibilityProperty, 0) },
     ]);
 
@@ -76,10 +96,37 @@ export class MichelsonScreenView extends ScreenView {
       children: [detectorNode, detectorReadouts],
     });
 
+    // ── Analysis column: the image turned into two measurements ──────────────
+    // The cut across the detector says what the pattern is doing here and now;
+    // the visibility curve says what it will do as the mirror travels. Together
+    // they are the difference between watching fringes and measuring them.
+    // The trace takes the source's own colour, so the curve and the image above
+    // it read as the same light rather than as two unrelated displays.
+    const profileNode = new IntensityProfileNode(
+      [
+        {
+          specProperty: model.fringeSpecProperty,
+          colorProperty: sourceColorProperty(model.lightSource.groupsProperty),
+        },
+      ],
+      { width: PLOT_WIDTH, height: PLOT_HEIGHT },
+    );
+
+    const envelopeNode = new CoherenceEnvelopeNode(model, {
+      width: PLOT_WIDTH,
+      height: PLOT_HEIGHT,
+    });
+
+    const analysisColumn = new VBox({
+      spacing: PANEL_SPACING + 2,
+      align: "center",
+      children: [profileNode, envelopeNode],
+    });
+
     const topRow = new HBox({
-      spacing: PANEL_SPACING + 8,
+      spacing: PANEL_SPACING,
       align: "top",
-      children: [tableNode, detectorColumn],
+      children: [tableNode, detectorColumn, analysisColumn],
     });
     topRow.left = this.layoutBounds.minX + SCREEN_VIEW_MARGIN;
     topRow.top = this.layoutBounds.minY + SCREEN_VIEW_MARGIN;

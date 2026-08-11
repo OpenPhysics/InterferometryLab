@@ -14,10 +14,13 @@
  */
 
 import { UnitConversionProperty } from "scenerystack/axon";
-import { createCheckbox } from "../../common/view/controlFactory.js";
+import { Text, VBox } from "scenerystack/scenery";
+import { PhetFont } from "scenerystack/scenery-phet";
+import { createTimeControl } from "../../common/view/controlFactory.js";
 import { InterferometryLabNumberControl } from "../../common/view/InterferometryLabNumberControl.js";
 import { TitledPanel } from "../../common/view/TitledPanel.js";
-import { ABSORPTANCE_RANGE, NM_PER_UM, REFLECTANCE_RANGE } from "../../InterferometryLabConstants.js";
+import InterferometryLabColors from "../../InterferometryLabColors.js";
+import { ABSORPTANCE_RANGE, LABEL_FONT_SIZE, NM_PER_UM, REFLECTANCE_RANGE } from "../../InterferometryLabConstants.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import type { FabryPerotModel } from "../model/FabryPerotModel.js";
 
@@ -81,13 +84,24 @@ export class FabryPerotCavityPanel extends TitledPanel {
       },
     );
 
-    const scanCheckbox = createCheckbox(
-      model.scanningProperty,
-      fabryPerot.scanCavityStringProperty,
-      a11y.scanCavityStringProperty,
-    );
+    // The sweep is a clock, not a setting, so it gets a clock's controls. Being
+    // able to stop it is the point: a transmission peak is narrow at high
+    // finesse and goes past in a fraction of a second, and the step button walks
+    // onto one a frame at a time.
+    const scanControl = new VBox({
+      align: "left",
+      spacing: 4,
+      children: [
+        new Text(fabryPerot.scanCavityStringProperty, {
+          font: new PhetFont(LABEL_FONT_SIZE),
+          fill: InterferometryLabColors.textColorProperty,
+          maxWidth: contentWidth,
+        }),
+        createTimeControl(model.timer.isPlayingProperty, () => model.stepOnce(), a11y.scanCavityStringProperty),
+      ],
+    });
 
-    super(fabryPerot.cavityStringProperty, [reflectanceControl, absorptanceControl, spacingControl, scanCheckbox], {
+    super(fabryPerot.cavityStringProperty, [reflectanceControl, absorptanceControl, spacingControl, scanControl], {
       contentWidth,
     });
   }

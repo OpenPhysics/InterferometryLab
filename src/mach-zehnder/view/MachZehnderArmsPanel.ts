@@ -40,8 +40,12 @@ export class MachZehnderArmsPanel extends TitledPanel {
       },
     );
 
+    // Both axes, as on the Michelson. The model has always carried a vertical
+    // tilt and fed it into the wedge term; without a control for it the fringes
+    // could only ever be made vertical, which quietly implies that is the only
+    // orientation a wedge can have.
     const tiltHorizontalControl = new InterferometryLabNumberControl(
-      machZehnder.tiltStringProperty,
+      machZehnder.tiltHorizontalStringProperty,
       model.tiltHorizontalProperty,
       MIRROR_TILT_RANGE_URAD,
       {
@@ -56,6 +60,24 @@ export class MachZehnderArmsPanel extends TitledPanel {
       },
     );
 
-    super(machZehnder.armsStringProperty, [imbalanceControl, tiltHorizontalControl], { contentWidth });
+    const tiltVerticalControl = new InterferometryLabNumberControl(
+      machZehnder.tiltVerticalStringProperty,
+      model.tiltVerticalProperty,
+      MIRROR_TILT_RANGE_URAD,
+      {
+        accessibleName: a11y.tiltVerticalStringProperty,
+        valuePattern: units.microradiansStringProperty,
+        decimals: 0,
+        delta: 1,
+        keyboardStep: 5,
+        shiftKeyboardStep: 1,
+        pageKeyboardStep: 50,
+        majorTicks: [{ value: 0, label: "0" }],
+      },
+    );
+
+    super(machZehnder.armsStringProperty, [imbalanceControl, tiltHorizontalControl, tiltVerticalControl], {
+      contentWidth,
+    });
   }
 }
