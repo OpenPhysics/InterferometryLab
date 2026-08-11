@@ -1,5 +1,7 @@
 # Interferometry Lab
 
+[![CI](https://github.com/OpenPhysics/InterferometryLab/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenPhysics/InterferometryLab/actions/workflows/ci.yml)
+
 An interactive physical-optics simulation of the three interferometers every optics course
 covers — **Michelson**, **Mach-Zehnder** and **Fabry-Pérot** — built with
 [SceneryStack](https://scenerystack.org/), Vite 8, TypeScript 7, and Biome 2.
