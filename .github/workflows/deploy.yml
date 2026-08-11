@@ -1,0 +1,17 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    uses: OpenPhysics/Baton/.github/workflows/deploy.yml@main
+    permissions:
+      contents: read
+      pages: write
+      id-token: write

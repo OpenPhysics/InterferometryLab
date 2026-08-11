@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "openphysics": {
+      "source": {
+        "source": "github",
+        "repo": "OpenPhysics/Baton"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "scenerystack@openphysics": true
+  }
+}

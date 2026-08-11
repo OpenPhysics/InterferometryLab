@@ -1,0 +1,69 @@
+{
+  "name": "scenerystack-template",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "GitHub template for OpenPhysics SceneryStack sims (rename + scaffold-screens for one or N screens).",
+  "license": "AGPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OpenPhysics/SceneryStackTemplate.git"
+  },
+  "keywords": [
+    "template",
+    "simulation",
+    "SceneryStack",
+    "interactive",
+    "physics",
+    "education",
+    "pwa"
+  ],
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "build:single": "tsc && vite build --mode single",
+    "preview": "vite preview",
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "fix": "biome check --write .",
+    "check": "tsc --noEmit && tsc -p tsconfig.scripts.json --noEmit && tsc -p tsconfig.test.json --noEmit",
+    "release": "npm run check && npm run lint && npm run build && npm version patch && git push && git push --tags",
+    "watch": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:fuzz": "playwright test --project=chromium",
+    "test:fuzz:quick": "FUZZ_DURATION=10 playwright test --project=chromium",
+    "icons": "tsx scripts/generate-icons.ts",
+    "rename": "tsx scripts/rename-sim.ts",
+    "scaffold-screens": "tsx scripts/scaffold-screens.ts",
+    "clean": "rm -rf dist",
+    "prepare": "git rev-parse --is-inside-work-tree >/dev/null 2>&1 && git config core.hooksPath .githooks || true"
+  },
+  "dependencies": {
+    "scenerystack": "^3.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.7",
+    "@playwright/test": "^1.62.1",
+    "@types/node": "^24.13.3",
+    "happy-dom": "^20.11.1",
+    "jsdom": "^30.0.1",
+    "playwright": "^1.61.1",
+    "png-to-ico": "^3.0.2",
+    "sharp": "^0.35.3",
+    "tsx": "^4.23.10",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.1",
+    "vite-plugin-pwa": "^1.3.0",
+    "vitest": "^4.1.10"
+  },
+  "engines": {
+    "node": ">=24"
+  },
+  "overrides": {
+    "lodash": "^4.18.0",
+    "three": "^0.125.0",
+    "brace-expansion": "^5.0.8"
+  }
+}

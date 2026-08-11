@@ -1,0 +1,21 @@
+{
+  "title": "Plantilla de Simulación",
+  "screens": {
+    "sim": "Sim"
+  },
+  "a11y": {
+    "screenSummary": {
+      "playArea": "El área de juego muestra el contenido principal de la simulación.",
+      "controlArea": "El área de control tiene un botón Restablecer todo que devuelve la simulación a su estado inicial.",
+      "interactionHint": "Explora la simulación interactuando con sus controles."
+    },
+    "currentDetails": "La simulación está en su estado inicial.",
+    "controls": {
+      "exampleControl": "Control de ejemplo"
+    }
+  },
+  "preferences": {
+    "title": "Simulación",
+    "exampleToggle": "Ejemplo de alternancia"
+  }
+}
