@@ -22,7 +22,7 @@
  *   --shared-model     Emit src/common/model/SharedModel.ts; each screen model composes it
  */
 
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, relative, resolve } from "node:path";
 
 // ── Argument parsing ──────────────────────────────────────────────────────────
@@ -234,11 +234,11 @@ function findPrototypeDir(): string {
     return preferred;
   }
   // Legacy post-rename layout: {id}-screen/
-  for (const entry of readdirSync(SRC)) {
-    const full = join(SRC, entry);
-    if (!(statSync(full).isDirectory() && entry.endsWith("-screen"))) {
+  for (const entry of readdirSync(SRC, { withFileTypes: true })) {
+    if (!(entry.isDirectory() && entry.name.endsWith("-screen"))) {
       continue;
     }
+    const full = join(SRC, entry.name);
     const screens = readdirSync(full).filter((f) => f.endsWith("Screen.ts") && !f.includes("View"));
     if (screens.length === 1) {
       return full;
@@ -250,11 +250,11 @@ function findPrototypeDir(): string {
 
 function walkFiles(dir: string): string[] {
   const out: string[] = [];
-  for (const entry of readdirSync(dir)) {
-    const full = join(dir, entry);
-    if (statSync(full).isDirectory()) {
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
       out.push(...walkFiles(full));
-    } else {
+    } else if (entry.isFile()) {
       out.push(full);
     }
   }
@@ -556,10 +556,12 @@ function updateDocs(screens: ScreenSpec[], simPrefix: string): void {
   ];
 
   for (const path of paths) {
-    if (!existsSync(path)) {
+    let original: string;
+    try {
+      original = readFileSync(path, "utf8");
+    } catch {
       continue;
     }
-    const original = readFileSync(path, "utf8");
     let text = original;
     if (basename(path) === "multi-screen.md") {
       for (const [from, to] of prose) {
