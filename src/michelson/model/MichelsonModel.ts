@@ -26,20 +26,18 @@
 import { BooleanProperty, DerivedProperty, NumberProperty, type TReadOnlyProperty } from "scenerystack/axon";
 import type { TModel } from "scenerystack/joist";
 import { type FringeSpec, toFringeGroups } from "../../common/model/FringeSpec.js";
+import { tiltWedgeNm } from "../../common/model/fringeIntensity.js";
 import { LightSourceModel } from "../../common/model/LightSourceModel.js";
 import { gasIndex, mediumOpticalPathDelta, uncompensatedDispersionOpd } from "../../common/model/refractiveIndex.js";
 import { spectrumVisibility } from "../../common/model/spectrum.js";
 import {
-  BEAM_HALF_WIDTH_NM,
   BEAMSPLITTER_SUBSTRATE_NM,
-  DETECTOR_FOCAL_LENGTH_NM,
-  DETECTOR_HALF_WIDTH_NM,
+  DETECTOR_APERTURE_TAN_THETA,
   GAS_CELL_LENGTH_NM,
   GAS_CELL_PRESSURE_RANGE_KPA,
   MICHELSON_COARSE_RANGE_NM,
   MICHELSON_FINE_RANGE_NM,
   MIRROR_TILT_RANGE_URAD,
-  RAD_PER_URAD,
   ROOM_TEMPERATURE_K,
   STANDARD_PRESSURE_KPA,
 } from "../../InterferometryLabConstants.js";
@@ -207,11 +205,9 @@ export class MichelsonModel implements TModel {
         geometry: {
           ringOpdNm: 2 * mirrorOffsetNm,
           constantOpdNm: cellOpdNm,
-          // A mirror tilted by α deflects the reflected wavefront by 2α, so the
-          // path difference across the beam changes by 2α times the beam radius.
-          tiltXNm: 2 * tiltHorizontal * RAD_PER_URAD * BEAM_HALF_WIDTH_NM,
-          tiltYNm: 2 * tiltVertical * RAD_PER_URAD * BEAM_HALF_WIDTH_NM,
-          apertureTanTheta: DETECTOR_HALF_WIDTH_NM / DETECTOR_FOCAL_LENGTH_NM,
+          tiltXNm: tiltWedgeNm(tiltHorizontal),
+          tiltYNm: tiltWedgeNm(tiltVertical),
+          apertureTanTheta: DETECTOR_APERTURE_TAN_THETA,
         },
         groups: toFringeGroups(
           spectrum.groups,

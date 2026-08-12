@@ -18,7 +18,7 @@ import { BANDWIDTH_RANGE_NM, LABEL_FONT_SIZE, WAVELENGTH_RANGE_NM } from "../../
 import { StringManager } from "../../i18n/StringManager.js";
 import { INTERFEROMETRY_LAB_COMBO_BOX_OPTIONS, LIGHT_SURFACE_TEXT_FILL } from "../InterferometryLabButtonOptions.js";
 import type { LightSourceModel } from "../model/LightSourceModel.js";
-import { SourceType } from "../model/SourceType.js";
+import type { SourceType } from "../model/SourceType.js";
 import { lengthProperty } from "./formatters.js";
 import { InterferometryLabNumberControl } from "./InterferometryLabNumberControl.js";
 import { ReadoutBlock } from "./ReadoutBlock.js";
@@ -45,29 +45,19 @@ export class LightSourcePanel extends TitledPanel {
     const common = strings.getCommon();
     const units = strings.getUnits();
 
-    const labelFor = (type: SourceType) =>
-      type === SourceType.HELIUM_NEON
-        ? common.heliumNeonStringProperty
-        : type === SourceType.GREEN_LASER
-          ? common.greenLaserStringProperty
-          : type === SourceType.BLUE_LASER
-            ? common.blueLaserStringProperty
-            : type === SourceType.SODIUM_LAMP
-              ? common.sodiumLampStringProperty
-              : type === SourceType.FILTERED_LAMP
-                ? common.filteredLampStringProperty
-                : common.whiteLightStringProperty;
-
-    const items: ComboBoxItem<SourceType>[] = model.availableTypes.map((type) => ({
-      value: type,
-      createNode: () =>
-        new Text(labelFor(type), {
-          font: new PhetFont(LABEL_FONT_SIZE),
-          fill: LIGHT_SURFACE_TEXT_FILL,
-          maxWidth: 150,
-        }),
-      accessibleName: labelFor(type),
-    }));
+    const items: ComboBoxItem<SourceType>[] = model.availableTypes.map((type) => {
+      const label = type.labelStringProperty(common);
+      return {
+        value: type,
+        createNode: () =>
+          new Text(label, {
+            font: new PhetFont(LABEL_FONT_SIZE),
+            fill: LIGHT_SURFACE_TEXT_FILL,
+            maxWidth: 150,
+          }),
+        accessibleName: label,
+      };
+    });
 
     const sourceComboBox = new ComboBox(model.sourceTypeProperty, items, options.listParent, {
       ...INTERFEROMETRY_LAB_COMBO_BOX_OPTIONS,

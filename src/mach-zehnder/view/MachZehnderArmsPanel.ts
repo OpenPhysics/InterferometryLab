@@ -11,9 +11,10 @@
  * Michelson's movable mirror does.
  */
 
+import { createTiltControl } from "../../common/view/controlFactory.js";
 import { InterferometryLabNumberControl } from "../../common/view/InterferometryLabNumberControl.js";
 import { TitledPanel } from "../../common/view/TitledPanel.js";
-import { MIRROR_TILT_RANGE_URAD, PATH_IMBALANCE_RANGE_NM } from "../../InterferometryLabConstants.js";
+import { PATH_IMBALANCE_RANGE_NM } from "../../InterferometryLabConstants.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import type { MachZehnderModel } from "../model/MachZehnderModel.js";
 
@@ -44,36 +45,16 @@ export class MachZehnderArmsPanel extends TitledPanel {
     // tilt and fed it into the wedge term; without a control for it the fringes
     // could only ever be made vertical, which quietly implies that is the only
     // orientation a wedge can have.
-    const tiltHorizontalControl = new InterferometryLabNumberControl(
+    const tiltHorizontalControl = createTiltControl(
       machZehnder.tiltHorizontalStringProperty,
       model.tiltHorizontalProperty,
-      MIRROR_TILT_RANGE_URAD,
-      {
-        accessibleName: a11y.tiltHorizontalStringProperty,
-        valuePattern: units.microradiansStringProperty,
-        decimals: 0,
-        delta: 1,
-        keyboardStep: 5,
-        shiftKeyboardStep: 1,
-        pageKeyboardStep: 50,
-        majorTicks: [{ value: 0, label: "0" }],
-      },
+      a11y.tiltHorizontalStringProperty,
     );
 
-    const tiltVerticalControl = new InterferometryLabNumberControl(
+    const tiltVerticalControl = createTiltControl(
       machZehnder.tiltVerticalStringProperty,
       model.tiltVerticalProperty,
-      MIRROR_TILT_RANGE_URAD,
-      {
-        accessibleName: a11y.tiltVerticalStringProperty,
-        valuePattern: units.microradiansStringProperty,
-        decimals: 0,
-        delta: 1,
-        keyboardStep: 5,
-        shiftKeyboardStep: 1,
-        pageKeyboardStep: 50,
-        majorTicks: [{ value: 0, label: "0" }],
-      },
+      a11y.tiltVerticalStringProperty,
     );
 
     super(machZehnder.armsStringProperty, [imbalanceControl, tiltHorizontalControl, tiltVerticalControl], {

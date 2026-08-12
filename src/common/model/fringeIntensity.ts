@@ -9,6 +9,7 @@
  * unit tests exercise exactly the code the screen runs.
  */
 
+import { BEAM_HALF_WIDTH_NM, RAD_PER_URAD } from "../../InterferometryLabConstants.js";
 import InterferometryLabNamespace from "../../InterferometryLabNamespace.js";
 import type { FringeGeometry, FringeSpec, MultiBeamTerms, TwoBeamTerms } from "./FringeSpec.js";
 import { lineVisibility } from "./spectrum.js";
@@ -37,6 +38,22 @@ export function opticalPathDifference(geometry: FringeGeometry, u: number, v: nu
     geometry.tiltYNm * v +
     geometry.constantOpdNm
   );
+}
+
+/**
+ * OPD-per-unit-detector-coordinate (nm) introduced by a mirror tilted by the
+ * given angle in microradians. A mirror tilted by α deflects the reflected
+ * wavefront by 2α, so the path difference across the beam changes by 2α times
+ * the beam radius — the wedge that turns circular fringes into straight ones.
+ *
+ * Used by the two-beam interferometers (Michelson, Mach-Zehnder), which tilt a
+ * mirror by the same physics to produce the same wedge term in their
+ * FringeGeometry. The Fabry-Pérot does not tilt and passes zero.
+ *
+ * @param tiltUradians - mirror tilt, µrad
+ */
+export function tiltWedgeNm(tiltUradians: number): number {
+  return 2 * tiltUradians * RAD_PER_URAD * BEAM_HALF_WIDTH_NM;
 }
 
 /**
@@ -220,6 +237,7 @@ export function intensityProfile(spec: FringeSpec, sampleCount: number, out?: Fl
 InterferometryLabNamespace.register("fringeIntensity", {
   axialCosine,
   opticalPathDifference,
+  tiltWedgeNm,
   opdSpread,
   twoBeamIntensity,
   airyPeakTransmission,

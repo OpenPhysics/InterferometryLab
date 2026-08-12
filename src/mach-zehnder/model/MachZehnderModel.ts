@@ -36,22 +36,19 @@ import {
 import { dotRandom, Vector2 } from "scenerystack/dot";
 import type { TModel } from "scenerystack/joist";
 import { type FringeSpec, toFringeGroups } from "../../common/model/FringeSpec.js";
-import { intensityAt } from "../../common/model/fringeIntensity.js";
+import { intensityAt, tiltWedgeNm } from "../../common/model/fringeIntensity.js";
 import { LightSourceModel } from "../../common/model/LightSourceModel.js";
 import { plateOpticalPathDelta } from "../../common/model/refractiveIndex.js";
 import { SourceType } from "../../common/model/SourceType.js";
 import { spectrumVisibility } from "../../common/model/spectrum.js";
 import { TimeModel } from "../../common/TimeModel.js";
 import {
-  BEAM_HALF_WIDTH_NM,
-  DETECTOR_FOCAL_LENGTH_NM,
-  DETECTOR_HALF_WIDTH_NM,
+  DETECTOR_APERTURE_TAN_THETA,
   MAX_PHOTON_MARKS,
   MIRROR_TILT_RANGE_URAD,
   NM_PER_UM,
   PATH_IMBALANCE_RANGE_NM,
   PHOTON_RATE_RANGE,
-  RAD_PER_URAD,
   SAMPLE_INDEX_RANGE,
   SAMPLE_THICKNESS_RANGE_UM,
   SAMPLE_TILT_RANGE_DEG,
@@ -221,9 +218,9 @@ export class MachZehnderModel implements TModel {
         // wedge the mirror tilt introduces.
         ringOpdNm: 0,
         constantOpdNm: pathDifference,
-        tiltXNm: 2 * tiltHorizontal * RAD_PER_URAD * BEAM_HALF_WIDTH_NM,
-        tiltYNm: 2 * tiltVertical * RAD_PER_URAD * BEAM_HALF_WIDTH_NM,
-        apertureTanTheta: DETECTOR_HALF_WIDTH_NM / DETECTOR_FOCAL_LENGTH_NM,
+        tiltXNm: tiltWedgeNm(tiltHorizontal),
+        tiltYNm: tiltWedgeNm(tiltVertical),
+        apertureTanTheta: DETECTOR_APERTURE_TAN_THETA,
       }),
     );
 

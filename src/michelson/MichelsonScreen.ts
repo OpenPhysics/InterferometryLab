@@ -14,10 +14,10 @@ import type { ScreenOptions } from "scenerystack/sim";
 import { Screen } from "scenerystack/sim";
 import type { Tandem } from "scenerystack/tandem";
 import { createMichelsonIcon } from "../common/InterferometryLabScreenIcons.js";
+import { InterferometryLabKeyboardHelpContent } from "../common/view/InterferometryLabKeyboardHelpContent.js";
 import InterferometryLabColors from "../InterferometryLabColors.js";
 import type { InterferometryLabPreferencesModel } from "../preferences/InterferometryLabPreferencesModel.js";
 import { MichelsonModel } from "./model/MichelsonModel.js";
-import { MichelsonKeyboardHelpContent } from "./view/MichelsonKeyboardHelpContent.js";
 import { MichelsonScreenView } from "./view/MichelsonScreenView.js";
 
 // Require tandem to be explicit — accidental omission would break PhET-iO.
@@ -41,7 +41,7 @@ export class MichelsonScreen extends Screen<MichelsonModel, MichelsonScreenView>
       optionize<MichelsonScreenOptions, EmptySelfOptions, ScreenOptions>()(
         {
           backgroundColorProperty: InterferometryLabColors.backgroundColorProperty,
-          createKeyboardHelpNode: () => new MichelsonKeyboardHelpContent(),
+          createKeyboardHelpNode: () => new InterferometryLabKeyboardHelpContent(),
           homeScreenIcon: createMichelsonIcon(),
           navigationBarIcon: createMichelsonIcon(),
         },

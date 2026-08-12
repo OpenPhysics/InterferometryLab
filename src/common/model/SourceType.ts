@@ -11,7 +11,23 @@
  * the order of increasing experimental difficulty.
  */
 
+import type { TReadOnlyProperty } from "scenerystack/axon";
 import { Enumeration, EnumerationValue } from "scenerystack/phet-core";
+
+/**
+ * The localized label Property for each source, keyed by source name. Any
+ * object exposing these six StringProperties satisfies this — in practice the
+ * `common` string group from {@link StringManager}. Passed in at the call site
+ * so this module stays free of the i18n system.
+ */
+export type SourceLabelProperties = {
+  readonly heliumNeonStringProperty: TReadOnlyProperty<string>;
+  readonly greenLaserStringProperty: TReadOnlyProperty<string>;
+  readonly blueLaserStringProperty: TReadOnlyProperty<string>;
+  readonly sodiumLampStringProperty: TReadOnlyProperty<string>;
+  readonly filteredLampStringProperty: TReadOnlyProperty<string>;
+  readonly whiteLightStringProperty: TReadOnlyProperty<string>;
+};
 
 export class SourceType extends EnumerationValue {
   /** Helium-neon laser, 632.8 nm. The classic red lab laser. */
@@ -44,4 +60,27 @@ export class SourceType extends EnumerationValue {
   public static readonly WHITE_LIGHT = new SourceType();
 
   public static readonly enumeration = new Enumeration(SourceType);
+
+  /**
+   * The localized label Property for this source — the human-readable name that
+   * appears in the source picker, in the a11y summary, and anywhere else a
+   * source needs naming. The mapping lives here, on the value itself, so the
+   * six-way "which label does this source get?" ternary is not duplicated
+   * across the views that name sources.
+   *
+   * @param labels - the common string group from StringManager
+   */
+  public labelStringProperty(labels: SourceLabelProperties): TReadOnlyProperty<string> {
+    return this === SourceType.HELIUM_NEON
+      ? labels.heliumNeonStringProperty
+      : this === SourceType.GREEN_LASER
+        ? labels.greenLaserStringProperty
+        : this === SourceType.BLUE_LASER
+          ? labels.blueLaserStringProperty
+          : this === SourceType.SODIUM_LAMP
+            ? labels.sodiumLampStringProperty
+            : this === SourceType.FILTERED_LAMP
+              ? labels.filteredLampStringProperty
+              : labels.whiteLightStringProperty;
+  }
 }

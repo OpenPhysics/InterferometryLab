@@ -39,8 +39,7 @@ import { TimeModel } from "../../common/TimeModel.js";
 import {
   ABSORPTANCE_RANGE,
   CAVITY_SPACING_RANGE_UM,
-  DETECTOR_FOCAL_LENGTH_NM,
-  DETECTOR_HALF_WIDTH_NM,
+  DETECTOR_APERTURE_TAN_THETA,
   LINE_SEPARATION_RANGE_PM,
   NM_PER_UM,
   PM_PER_NM,
@@ -234,7 +233,7 @@ export class FabryPerotModel implements TModel {
           constantOpdNm: 0,
           tiltXNm: 0,
           tiltYNm: 0,
-          apertureTanTheta: DETECTOR_HALF_WIDTH_NM / DETECTOR_FOCAL_LENGTH_NM,
+          apertureTanTheta: DETECTOR_APERTURE_TAN_THETA,
         },
         groups: toFringeGroups(lines),
         terms: { kind: "multi-beam", reflectance, absorptance, extraPhaseRad: 0 },

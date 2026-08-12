@@ -10,11 +10,10 @@
  * same information, and it is the one thing the numbers alone do not convey.
  */
 
-import { DerivedProperty } from "scenerystack/axon";
+import { DerivedProperty, DynamicProperty } from "scenerystack/axon";
 import { StringUtils } from "scenerystack/phetcommon";
 import { ScreenSummaryContent } from "scenerystack/sim";
 import { opdSpread } from "../../common/model/fringeIntensity.js";
-import { SourceType } from "../../common/model/SourceType.js";
 import { lengthProperty, percentProperty } from "../../common/view/formatters.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import type { MichelsonModel } from "../model/MichelsonModel.js";
@@ -37,29 +36,13 @@ export class MichelsonScreenSummaryContent extends ScreenSummaryContent {
     const a11y = strings.getMichelsonA11yStrings();
     const common = strings.getCommon();
 
-    const sourceNameProperty = new DerivedProperty(
-      [
-        model.lightSource.sourceTypeProperty,
-        common.heliumNeonStringProperty,
-        common.greenLaserStringProperty,
-        common.blueLaserStringProperty,
-        common.sodiumLampStringProperty,
-        common.filteredLampStringProperty,
-        common.whiteLightStringProperty,
-      ],
-      (type, heliumNeon, green, blue, sodium, filtered, white) =>
-        type === SourceType.HELIUM_NEON
-          ? heliumNeon
-          : type === SourceType.GREEN_LASER
-            ? green
-            : type === SourceType.BLUE_LASER
-              ? blue
-              : type === SourceType.SODIUM_LAMP
-                ? sodium
-                : type === SourceType.FILTERED_LAMP
-                  ? filtered
-                  : white,
-    );
+    // The source's localized name, picked from the common string group by the
+    // current SourceType. Swapping which Property is being read when the source
+    // changes — and tracking the new Property through locale switches — is what
+    // DynamicProperty is for, instead of a DerivedProperty over all six labels.
+    const sourceNameProperty = new DynamicProperty(model.lightSource.sourceTypeProperty, {
+      derive: (type) => type.labelStringProperty(common),
+    });
 
     const patternProperty = new DerivedProperty(
       [

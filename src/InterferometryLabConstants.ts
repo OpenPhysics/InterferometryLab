@@ -131,6 +131,15 @@ export const DETECTOR_FOCAL_LENGTH_NM = 250 * NM_PER_MM;
 export const DETECTOR_HALF_WIDTH_NM = 50 * NM_PER_MM;
 
 /**
+ * Ratio tan θ / ρ of detector half-width to focal length — the constant that
+ * turns a detector radius into a ray angle. Every screen's FringeGeometry
+ * carries the same value here, because all three instruments image the same
+ * detector geometry; defining it once keeps the three models from each
+ * recomputing `DETECTOR_HALF_WIDTH_NM / DETECTOR_FOCAL_LENGTH_NM`.
+ */
+export const DETECTOR_APERTURE_TAN_THETA = DETECTOR_HALF_WIDTH_NM / DETECTOR_FOCAL_LENGTH_NM;
+
+/**
  * Half-width (nm) of the collimated beam on the mirrors. A mirror tilt α turns
  * into an optical path difference of 2α across the beam, so this sets how many
  * straight fringes a given tilt produces.
@@ -259,6 +268,7 @@ InterferometryLabNamespace.register("InterferometryLabConstants", {
   GAS_CELL_LENGTH_NM,
   DETECTOR_FOCAL_LENGTH_NM,
   DETECTOR_HALF_WIDTH_NM,
+  DETECTOR_APERTURE_TAN_THETA,
   BEAM_HALF_WIDTH_NM,
   BEAMSPLITTER_SUBSTRATE_NM,
   FRINGE_SAMPLES_MONOCHROMATIC,

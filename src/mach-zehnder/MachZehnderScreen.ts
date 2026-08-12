@@ -14,10 +14,10 @@ import type { ScreenOptions } from "scenerystack/sim";
 import { Screen } from "scenerystack/sim";
 import type { Tandem } from "scenerystack/tandem";
 import { createMachZehnderIcon } from "../common/InterferometryLabScreenIcons.js";
+import { InterferometryLabKeyboardHelpContent } from "../common/view/InterferometryLabKeyboardHelpContent.js";
 import InterferometryLabColors from "../InterferometryLabColors.js";
 import type { InterferometryLabPreferencesModel } from "../preferences/InterferometryLabPreferencesModel.js";
 import { MachZehnderModel } from "./model/MachZehnderModel.js";
-import { MachZehnderKeyboardHelpContent } from "./view/MachZehnderKeyboardHelpContent.js";
 import { MachZehnderScreenView } from "./view/MachZehnderScreenView.js";
 
 // Require tandem to be explicit — accidental omission would break PhET-iO.
@@ -41,7 +41,7 @@ export class MachZehnderScreen extends Screen<MachZehnderModel, MachZehnderScree
       optionize<MachZehnderScreenOptions, EmptySelfOptions, ScreenOptions>()(
         {
           backgroundColorProperty: InterferometryLabColors.backgroundColorProperty,
-          createKeyboardHelpNode: () => new MachZehnderKeyboardHelpContent(),
+          createKeyboardHelpNode: () => new InterferometryLabKeyboardHelpContent(),
           homeScreenIcon: createMachZehnderIcon(),
           navigationBarIcon: createMachZehnderIcon(),
         },

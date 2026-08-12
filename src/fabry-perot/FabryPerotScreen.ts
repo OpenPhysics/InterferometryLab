@@ -14,10 +14,10 @@ import type { ScreenOptions } from "scenerystack/sim";
 import { Screen } from "scenerystack/sim";
 import type { Tandem } from "scenerystack/tandem";
 import { createFabryPerotIcon } from "../common/InterferometryLabScreenIcons.js";
+import { InterferometryLabKeyboardHelpContent } from "../common/view/InterferometryLabKeyboardHelpContent.js";
 import InterferometryLabColors from "../InterferometryLabColors.js";
 import type { InterferometryLabPreferencesModel } from "../preferences/InterferometryLabPreferencesModel.js";
 import { FabryPerotModel } from "./model/FabryPerotModel.js";
-import { FabryPerotKeyboardHelpContent } from "./view/FabryPerotKeyboardHelpContent.js";
 import { FabryPerotScreenView } from "./view/FabryPerotScreenView.js";
 
 // Require tandem to be explicit — accidental omission would break PhET-iO.
@@ -41,7 +41,7 @@ export class FabryPerotScreen extends Screen<FabryPerotModel, FabryPerotScreenVi
       optionize<FabryPerotScreenOptions, EmptySelfOptions, ScreenOptions>()(
         {
           backgroundColorProperty: InterferometryLabColors.backgroundColorProperty,
-          createKeyboardHelpNode: () => new FabryPerotKeyboardHelpContent(),
+          createKeyboardHelpNode: () => new InterferometryLabKeyboardHelpContent(),
           homeScreenIcon: createFabryPerotIcon(),
           navigationBarIcon: createFabryPerotIcon(),
         },

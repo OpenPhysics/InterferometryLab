@@ -14,12 +14,14 @@ import { Text } from "scenerystack/scenery";
 import { PhetFont, TimeControlNode } from "scenerystack/scenery-phet";
 import { Checkbox, RectangularPushButton } from "scenerystack/sun";
 import InterferometryLabColors from "../../InterferometryLabColors.js";
-import { LABEL_FONT_SIZE } from "../../InterferometryLabConstants.js";
+import { LABEL_FONT_SIZE, MIRROR_TILT_RANGE_URAD } from "../../InterferometryLabConstants.js";
+import { StringManager } from "../../i18n/StringManager.js";
 import {
   FLAT_PLAY_PAUSE_STEP_BUTTON_OPTIONS,
   FLAT_RECTANGULAR_BUTTON_OPTIONS,
   LIGHT_SURFACE_TEXT_FILL,
 } from "../InterferometryLabButtonOptions.js";
+import { InterferometryLabNumberControl } from "./InterferometryLabNumberControl.js";
 
 /**
  * A checkbox with a text label, themed for the sim's panels.
@@ -112,5 +114,34 @@ export function createTimeControl(
         listener: stepOnce,
       },
     },
+  });
+}
+
+/**
+ * A mirror-tilt slider, µrad. Shared by the Michelson and Mach-Zehnder screens,
+ * where the same control drives the same physics: a tilt α wedges the
+ * wavefronts by 2α, so the path difference grows linearly across the beam and
+ * the fringes straighten. The keyboard steps favour the small end — only
+ * shift-arrow reaches the wedge that produces a handful of bars rather than a
+ * blur — so they are pinned here rather than left to NumberControl's defaults.
+ *
+ * @param title - visible label, e.g. "Tilt horizontal"
+ * @param valueProperty - the µrad value this slider drives
+ * @param accessibleName - name announced by a screen reader
+ */
+export function createTiltControl(
+  title: TReadOnlyProperty<string>,
+  valueProperty: PhetioProperty<number>,
+  accessibleName: TReadOnlyProperty<string>,
+): InterferometryLabNumberControl {
+  return new InterferometryLabNumberControl(title, valueProperty, MIRROR_TILT_RANGE_URAD, {
+    accessibleName,
+    valuePattern: StringManager.getInstance().getUnits().microradiansStringProperty,
+    decimals: 0,
+    delta: 1,
+    keyboardStep: 5,
+    shiftKeyboardStep: 1,
+    pageKeyboardStep: 50,
+    majorTicks: [{ value: 0, label: "0" }],
   });
 }

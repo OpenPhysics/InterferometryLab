@@ -11,10 +11,8 @@
  * where a student can drive between them.
  */
 
-import { createCheckbox } from "../../common/view/controlFactory.js";
-import { InterferometryLabNumberControl } from "../../common/view/InterferometryLabNumberControl.js";
+import { createCheckbox, createTiltControl } from "../../common/view/controlFactory.js";
 import { TitledPanel } from "../../common/view/TitledPanel.js";
-import { MIRROR_TILT_RANGE_URAD } from "../../InterferometryLabConstants.js";
 import { StringManager } from "../../i18n/StringManager.js";
 import type { MichelsonModel } from "../model/MichelsonModel.js";
 
@@ -22,39 +20,18 @@ export class MichelsonAlignmentPanel extends TitledPanel {
   public constructor(model: MichelsonModel, contentWidth: number) {
     const strings = StringManager.getInstance();
     const michelson = strings.getMichelsonStrings();
-    const units = strings.getUnits();
     const a11y = strings.getMichelsonA11yStrings().controls;
 
-    const tiltHorizontalControl = new InterferometryLabNumberControl(
+    const tiltHorizontalControl = createTiltControl(
       michelson.tiltHorizontalStringProperty,
       model.tiltHorizontalProperty,
-      MIRROR_TILT_RANGE_URAD,
-      {
-        accessibleName: a11y.tiltHorizontalStringProperty,
-        valuePattern: units.microradiansStringProperty,
-        decimals: 0,
-        delta: 1,
-        keyboardStep: 5,
-        shiftKeyboardStep: 1,
-        pageKeyboardStep: 50,
-        majorTicks: [{ value: 0, label: "0" }],
-      },
+      a11y.tiltHorizontalStringProperty,
     );
 
-    const tiltVerticalControl = new InterferometryLabNumberControl(
+    const tiltVerticalControl = createTiltControl(
       michelson.tiltVerticalStringProperty,
       model.tiltVerticalProperty,
-      MIRROR_TILT_RANGE_URAD,
-      {
-        accessibleName: a11y.tiltVerticalStringProperty,
-        valuePattern: units.microradiansStringProperty,
-        decimals: 0,
-        delta: 1,
-        keyboardStep: 5,
-        shiftKeyboardStep: 1,
-        pageKeyboardStep: 50,
-        majorTicks: [{ value: 0, label: "0" }],
-      },
+      a11y.tiltVerticalStringProperty,
     );
 
     const compensatorCheckbox = createCheckbox(
