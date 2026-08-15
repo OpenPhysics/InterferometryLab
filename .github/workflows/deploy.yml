@@ -3,6 +3,10 @@ name: Deploy
 on:
   push:
     branches: [main]
+  # Manual dispatch, so the site can be published without waiting for a push and
+  # so a deploy that never fired can be recovered by hand. Matches Baton's own
+  # pages.yml, which carries the same pair of triggers.
+  workflow_dispatch:
 
 concurrency:
   group: pages-${{ github.ref }}
