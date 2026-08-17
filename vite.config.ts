@@ -16,9 +16,7 @@ const securityHeaders: Record<string, string> = {
   "Content-Security-Policy": [
     "default-src 'self'",
     // TODO(scenerystack): drop 'unsafe-eval' when SceneryStack no longer needs
-
     // Function/eval for query-parameter parsing — reopen a CSP audit then.
-
     // 'unsafe-eval' is required for SceneryStack query parameter parsing
     "script-src 'self' 'unsafe-eval'",
     // Event-handler attributes are governed separately from inline <script>
@@ -40,9 +38,7 @@ const securityHeaders: Record<string, string> = {
       "'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU='",
     "worker-src blob: 'self'",
     // TODO(scenerystack): drop 'unsafe-inline' when SceneryStack stops setting
-
     // element.style / cssText for theming (same CSP revisit as unsafe-eval).
-
     // Inline styles are set via element.style / cssText throughout the UI layer
     "style-src 'self' 'unsafe-inline'",
     // data: for icons
