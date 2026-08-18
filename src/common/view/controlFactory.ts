@@ -44,11 +44,10 @@ export function createCheckbox(
     }),
     {
       accessibleName,
-      // The box is a light control surface, so its tick and border take the dark
-      // on-surface colour — not the panel's text colour, which is near-white in
-      // the default profile and would leave the tick invisible.
-      checkboxColor: InterferometryLabColors.controlSurfaceTextColorProperty,
-      checkboxColorBackground: InterferometryLabColors.controlSurfaceColorProperty,
+      // Light tick/border on the dark panel fill — not controlSurfaceText, which
+      // is for labels on white chrome.
+      checkboxColor: InterferometryLabColors.textColorProperty,
+      checkboxColorBackground: InterferometryLabColors.panelBackgroundColorProperty,
       spacing: 7,
       boxWidth: 15,
     },
