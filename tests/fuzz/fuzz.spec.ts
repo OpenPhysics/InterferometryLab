@@ -27,7 +27,7 @@ test.describe("Fuzz Testing", () => {
     const assertions: ConsoleMessage[] = [];
     const startTime = Date.now();
 
-    const fuzzUrl = `/?fuzz&randomSeed=${FUZZ_SEED}&fuzzRate=${FUZZ_RATE}&fuzzPointers=${FUZZ_POINTERS}`;
+    const fuzzUrl = `/?fuzz&ea&randomSeed=${FUZZ_SEED}&fuzzRate=${FUZZ_RATE}&fuzzPointers=${FUZZ_POINTERS}`;
 
     page.on("console", (msg) => {
       const type = msg.type();
