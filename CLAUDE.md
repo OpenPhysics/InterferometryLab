@@ -87,10 +87,10 @@ micrometer, mirror tilt) only reach their useful precision via shift-arrow.
 
 ## Compliance carve-outs
 
-- **`src/common/view/spectralColor.ts` and `sourceColor.ts` construct colours in code.** The
-  compliance grep flags `new Color(...)` and `encodeSrgb(...)` as possible hardcoded colours.
-  They are not theme colours — they are the output of a wavelength-to-colour computation, which
-  is physics, not styling. Every *themeable* colour lives in `InterferometryLabColors.ts`.
+- **Hardcoded colors:** `src/common/view/spectralColor.ts` and `sourceColor.ts` construct colours in
+  code. The compliance grep flags `new Color(...)` and `encodeSrgb(...)` as possible hardcoded
+  colors. They are not theme colours — they are the output of a wavelength-to-colour computation,
+  which is physics, not styling. Every *themeable* colour lives in `InterferometryLabColors.ts`.
   `scenery-phet`'s `VisibleColor` is deliberately not used for anything that gets summed, for the
   reasons in the implementation notes.
 - **`tests/memory-leak.test.ts` diverges from the template**: its `forceGC()` takes a predicate
