@@ -2,8 +2,8 @@
 
 ## Supported versions
 
-Security fixes are applied to the default branch (`main`) of active OpenPhysics
-repositories listed in [structure/repos.json](https://github.com/OpenPhysics/Baton/blob/main/structure/repos.json).
+Security fixes are applied to the default branch (`main`) of active OpenLyceum
+repositories listed in [structure/repos.json](https://github.com/OpenLyceum/Baton/blob/main/structure/repos.json).
 
 ## Reporting a vulnerability
 
@@ -17,7 +17,7 @@ affected repository:
 3. Submit a private advisory with steps to reproduce and impact.
 
 If you cannot use GitHub Security Advisories for a given repository, open a
-private report via the OpenPhysics organization contact channels.
+private report via the OpenLyceum organization contact channels.
 
 We aim to acknowledge reports within a reasonable timeframe and will coordinate
 disclosure once a fix is available.

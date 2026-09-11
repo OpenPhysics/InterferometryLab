@@ -392,7 +392,7 @@ directly rather than using **Use this template**, set it in `package.json` by ha
 
 ### Baton `create-sim` (recommended for agents / fleet)
 
-From the OpenPhysics workspace:
+From the OpenLyceum workspace:
 
 ```sh
 Baton/scripts/create-sim.sh \
@@ -405,8 +405,8 @@ Baton/scripts/create-sim.sh \
 
 Creates the GitHub repo from this template, clones it beside `Baton`, runs
 rename + scaffold-screens + check. `--onboard` finishes catalog, screenshot,
-WebP, Pages index, and the OpenPhysics README Layout row; add `--pr` to open
-follow-up PRs. See [`Baton/doc/add-simulation.md`](https://github.com/OpenPhysics/Baton/blob/main/doc/add-simulation.md).
+WebP, Pages index, and the OpenLyceum README Layout row; add `--pr` to open
+follow-up PRs. See [`Baton/doc/add-simulation.md`](https://github.com/OpenLyceum/Baton/blob/main/doc/add-simulation.md).
 
 ### Monorepo / workspace setup
 
@@ -432,7 +432,7 @@ To pull template improvements back into an existing fork:
 
 ```sh
 # One-time: add the template as a remote
-git remote add template https://github.com/OpenPhysics/SceneryStackTemplate.git
+git remote add template https://github.com/OpenLyceum/SceneryStackTemplate.git
 
 # Pull template changes into a branch for review
 git fetch template

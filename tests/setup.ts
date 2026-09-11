@@ -5,7 +5,7 @@
  * happy-dom does not provide working versions, so we patch in minimal mocks
  * before any scenerystack code loads, then call init() once for the suite.
  *
- * This is the canonical test setup for OpenPhysics sims — copy it as-is when
+ * This is the canonical test setup for OpenLyceum sims — copy it as-is when
  * forking the template, changing only the `name` passed to init() below.
  */
 

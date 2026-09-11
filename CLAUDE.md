@@ -1,8 +1,8 @@
 # CLAUDE.md — Interferometry Lab
 
 Sim-specific context for AI assistants. General SceneryStack guidance:
-[OpenPhysics/.github/CLAUDE.md](https://github.com/OpenPhysics/.github/blob/main/CLAUDE.md).
-Fleet structure rules: [Baton/CONVENTIONS.md](https://github.com/OpenPhysics/Baton/blob/main/CONVENTIONS.md).
+[OpenLyceum/.github/CLAUDE.md](https://github.com/OpenLyceum/.github/blob/main/CLAUDE.md).
+Fleet structure rules: [Baton/CONVENTIONS.md](https://github.com/OpenLyceum/Baton/blob/main/CONVENTIONS.md).
 
 ## Project
 

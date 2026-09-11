@@ -24,14 +24,14 @@ permissions:
 
 jobs:
   ci:
-    uses: OpenPhysics/Baton/.github/workflows/ci.yml@main
+    uses: OpenLyceum/Baton/.github/workflows/ci.yml@main
 
   compliance:
-    uses: OpenPhysics/Baton/.github/workflows/shared-compliance-check.yml@main
+    uses: OpenLyceum/Baton/.github/workflows/shared-compliance-check.yml@main
 
   dependency-review:
     if: github.event_name == 'pull_request'
-    uses: OpenPhysics/Baton/.github/workflows/shared-dependency-review.yml@main
+    uses: OpenLyceum/Baton/.github/workflows/shared-dependency-review.yml@main
 
   codeql:
-    uses: OpenPhysics/Baton/.github/workflows/shared-codeql.yml@main
+    uses: OpenLyceum/Baton/.github/workflows/shared-codeql.yml@main

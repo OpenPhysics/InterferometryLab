@@ -14,7 +14,7 @@ concurrency:
 
 jobs:
   deploy:
-    uses: OpenPhysics/Baton/.github/workflows/deploy.yml@main
+    uses: OpenLyceum/Baton/.github/workflows/deploy.yml@main
     permissions:
       contents: read
       pages: write

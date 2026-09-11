@@ -1,6 +1,6 @@
 # Interferometry Lab
 
-[![CI](https://github.com/OpenPhysics/InterferometryLab/actions/workflows/ci.yml/badge.svg)](https://github.com/OpenPhysics/InterferometryLab/actions/workflows/ci.yml)
+[![CI](../../actions/workflows/ci.yml/badge.svg)](../../actions/workflows/ci.yml)
 
 An interactive physical-optics simulation of the three interferometers every optics course
 covers — **Michelson**, **Mach-Zehnder** and **Fabry-Pérot** — built with
@@ -10,7 +10,7 @@ Geometric-optics simulators are common. This one is a *physical* optics simulato
 optical path length, phase and partial coherence, and renders the interference pattern those
 produce rather than drawing a picture of one.
 
-**[Launch the simulation →](https://openphysics.github.io/InterferometryLab)**
+**[Launch the simulation →](https://openlyceum.github.io/InterferometryLab)**
 
 ## Features
 
@@ -38,7 +38,7 @@ produce rather than drawing a picture of one.
 - English, Spanish, and French localization via `StringManager`
 - Default and projector color profiles
 - Progressive Web App (installable, offline-capable)
-- Shared GitHub Actions CI via `OpenPhysics/Baton`
+- Shared GitHub Actions CI via `OpenLyceum/Baton`
 
 ### Documentation
 
@@ -86,9 +86,9 @@ New sims start at `version: "0.0.0"` in `package.json`. Bump only when cutting a
 
 ## License
 
-GNU Affero General Public License v3.0 — see [OpenPhysics org license](https://github.com/OpenPhysics/.github/blob/main/LICENSE).
+GNU Affero General Public License v3.0 — see [OpenLyceum org license](https://github.com/OpenLyceum/.github/blob/main/LICENSE).
 
 ## Contributing
 
-See [OpenPhysics contributing guidelines](https://github.com/OpenPhysics/.github/blob/main/CONTRIBUTING.md).
+See [OpenLyceum contributing guidelines](https://github.com/OpenLyceum/.github/blob/main/CONTRIBUTING.md).
 Report bugs via GitHub Issues; use org issue templates.
